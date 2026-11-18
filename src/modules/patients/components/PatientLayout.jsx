@@ -5,10 +5,10 @@ import useAuth from '../../auth/hook/useAuth';
 function PatientLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { singout } = useAuth();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    singout();
+    logout();
     navigate('/login');
   };
 
