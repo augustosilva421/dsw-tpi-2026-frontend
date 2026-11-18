@@ -1,8 +1,3 @@
-const frontendErrorMessage = {
-  1000: 'Usuario y/o Contraseña no son correctos',
-  1002: 'Usuario y/o Contraseña no son correctos',
-};
-
 const getApiErrorMessage = (error) => {
   if (!error?.response) {
     return 'No se pudo conectar con el servidor. Intentá de nuevo más tarde.';
@@ -21,4 +16,4 @@ const getApiErrorMessage = (error) => {
   return data?.message || 'Ocurrió un error inesperado.';
 };
 
-export { frontendErrorMessage, getApiErrorMessage };
+export { getApiErrorMessage };

@@ -16,7 +16,7 @@ function PatientLoginPage() {
   const navigate = useNavigate();
   const { loginPatient } = useAuth();
 
-    const onValid = async (formData) => {
+  const onValid = async (formData) => {
     try {
       await loginPatient(formData.email, formData.dni);
       navigate('/');
@@ -102,7 +102,7 @@ function PatientLoginPage() {
             )}
           </div>
 
-                    {/* DNI */}
+          {/* DNI */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-med-text-main">
               DNI
@@ -132,7 +132,6 @@ function PatientLoginPage() {
           <Button type="submit" className="w-full mt-1">
             Ingresar
           </Button>
-
 
           {errorMessage && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 text-center">
