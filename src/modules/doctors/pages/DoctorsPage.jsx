@@ -1,54 +1,115 @@
 import { useState } from 'react';
+import Alert from '../../shared/components/Alert';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
+import Modal from '../../shared/components/Modal';
 import PageHeader from '../../shared/components/PageHeader';
 import StatusBadge from '../../shared/components/StatusBadge';
 import Table from '../../shared/components/Table';
 import TablePagination from '../../shared/components/TablePagination';
+import { getErrorMessage } from '../../shared/helpers/apiError';
+import { normalizeNameFilter } from '../../shared/helpers/nameFilter';
+import { PAGE_SIZE, getTotalPages } from '../../shared/helpers/pagination';
+import useDebouncedValue from '../../shared/hooks/useDebouncedValue';
+import useSpecialties from '../../specialties/hooks/useSpecialties';
+import { createDoctor, deleteDoctor, updateDoctor } from '../api/doctorsApi';
+import DoctorAvailabilityModal from '../components/DoctorAvailabilityModal';
+import DoctorForm from '../components/DoctorForm';
+import useDoctors from '../hooks/useDoctors';
 
-const doctorsList = [
-  {
-    id: 'MED-4920',
-    name: 'Dr. Alejandro Rivera',
-    specialty: 'Cardiología Clínica',
-    status: 'Activo',
-    statusType: 'active',
-  },
-  {
-    id: 'MED-2104',
-    name: 'Dra. Elena Martínez',
-    specialty: 'Pediatría Avanzada',
-    status: 'De licencia',
-    statusType: 'leave',
-  },
-  {
-    id: 'MED-8831',
-    name: 'Dr. Marcos Torres',
-    specialty: 'Neurocirugía',
-    status: 'Activo',
-    statusType: 'active',
-  },
-  {
-    id: 'MED-1192',
-    name: 'Dra. Lucía Soria',
-    specialty: 'Ginecología',
-    status: 'Activo',
-    statusType: 'active',
-  },
-];
+const SPECIALTY_OPTIONS_LIMIT = 100;
 
 function DoctorsPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const [formState, setFormState] = useState(null); // { doctor } | null
+  const [doctorToDelete, setDoctorToDelete] = useState(null);
+  const [availabilityDoctor, setAvailabilityDoctor] = useState(null);
+  const [formError, setFormError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
-  const filteredDoctors = doctorsList.filter((doctor) => {
-    const query = searchTerm.toLowerCase();
+  const debouncedSearch = useDebouncedValue(searchTerm);
+  const name = normalizeNameFilter(debouncedSearch);
 
-    return (
-      doctor.name.toLowerCase().includes(query) ||
-      doctor.specialty.toLowerCase().includes(query) ||
-      doctor.id.toLowerCase().includes(query)
-    );
+  const { data, total, loading, error, reload } = useDoctors({
+    page,
+    pageSize: PAGE_SIZE,
+    name,
   });
+
+  const { data: specialties, loading: specialtiesLoading } = useSpecialties({
+    pageSize: SPECIALTY_OPTIONS_LIMIT,
+  });
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+    setPage(1);
+  };
+
+  const openForm = (doctor = null) => {
+    setFormError('');
+    setFormState({ doctor });
+  };
+
+  const closeForm = () => setFormState(null);
+
+  const handleSave = async (values) => {
+    const { doctor } = formState;
+
+    setSubmitting(true);
+    setFormError('');
+
+    try {
+      if (doctor) {
+        await updateDoctor(doctor.id, values);
+      } else {
+        await createDoctor(values);
+      }
+
+      setFormState(null);
+      setFeedback({
+        type: 'success',
+        text: doctor
+          ? 'Doctor actualizado correctamente.'
+          : 'Doctor creado correctamente.',
+      });
+      reload();
+    } catch (requestError) {
+      setFormError(getErrorMessage(requestError));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setSubmitting(true);
+
+    try {
+      await deleteDoctor(doctorToDelete.id);
+      setFeedback({ type: 'success', text: 'Doctor eliminado.' });
+
+      if (data.length === 1 && page > 1) {
+        setPage(page - 1);
+      } else {
+        reload();
+      }
+    } catch (requestError) {
+      setFeedback({ type: 'error', text: getErrorMessage(requestError) });
+    } finally {
+      setDoctorToDelete(null);
+      setSubmitting(false);
+    }
+  };
+
+  const handleAvailabilitySaved = () => {
+    setAvailabilityDoctor(null);
+    setFeedback({
+      type: 'success',
+      text: 'Disponibilidad horaria guardada correctamente.',
+    });
+  };
 
   const columns = [
     {
@@ -59,29 +120,23 @@ function DoctorsPage() {
           <p className="font-semibold text-med-primary-900 leading-tight">
             {doctor.name}
           </p>
-          <p className="text-xs text-med-text-muted mt-0.5">ID: {doctor.id}</p>
+          {doctor.licenseNumber && (
+            <p className="text-xs text-med-text-muted mt-0.5">
+              Matrícula: {doctor.licenseNumber}
+            </p>
+          )}
         </div>
       ),
     },
     {
       key: 'specialty',
       header: 'Especialidad',
-      render: (doctor) => (
-        <StatusBadge tone="info">{doctor.specialty}</StatusBadge>
-      ),
-    },
-    {
-      key: 'status',
-      header: 'Estado de disponibilidad',
-      align: 'center',
-      render: (doctor) => (
-        <StatusBadge
-          tone={doctor.statusType === 'active' ? 'success' : 'warning'}
-          dot
-        >
-          {doctor.status}
-        </StatusBadge>
-      ),
+      render: (doctor) =>
+        doctor.specialty?.name ? (
+          <StatusBadge tone="info">{doctor.specialty.name}</StatusBadge>
+        ) : (
+          '-'
+        ),
     },
     {
       key: 'actions',
@@ -92,21 +147,22 @@ function DoctorsPage() {
           <Button
             variant="ghost"
             className="px-2 py-1 text-xs"
-            onClick={() => alert(`Ver detalle de ${doctor.name}`)}
+            onClick={() => setAvailabilityDoctor(doctor)}
           >
-            Ver
+            Disponibilidad
           </Button>
           <Button
             variant="ghost"
             className="px-2 py-1 text-xs"
-            onClick={() => alert(`Editar profesional ${doctor.name}`)}
+            disabled={specialtiesLoading}
+            onClick={() => openForm(doctor)}
           >
             Editar
           </Button>
           <Button
             variant="ghost"
             className="px-2 py-1 text-xs text-med-danger-text"
-            onClick={() => alert(`Eliminar profesional ${doctor.name}`)}
+            onClick={() => setDoctorToDelete(doctor)}
           >
             Eliminar
           </Button>
@@ -119,25 +175,29 @@ function DoctorsPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Directorio de Doctores"
-        description="Gestione el personal médico y su disponibilidad actual."
+        description="Gestione el personal médico y su disponibilidad horaria."
         actions={
           <>
             <input
               type="search"
               value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Buscar doctor..."
+              onChange={handleSearchChange}
+              placeholder="Buscar doctor (mín. 3 letras)..."
               className="min-w-[220px] px-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-1 focus:ring-med-primary-600"
             />
-            <Button onClick={() => alert('Abrir formulario de disponibilidad')}>
-              + Disponibilidad
-            </Button>
-            <Button onClick={() => alert('Abrir formulario de doctor')}>
+            <Button disabled={specialtiesLoading} onClick={() => openForm()}>
               + Nuevo doctor
             </Button>
           </>
         }
       />
+
+      {feedback && (
+        <Alert type={feedback.type} onClose={() => setFeedback(null)}>
+          {feedback.text}
+        </Alert>
+      )}
+      {error && <Alert>{error}</Alert>}
 
       <Card className="p-0 overflow-hidden border-med-border">
         <div className="p-5 border-b border-med-border">
@@ -147,16 +207,56 @@ function DoctorsPage() {
         </div>
         <Table
           columns={columns}
-          data={filteredDoctors}
+          data={data}
           rowKey={(doctor) => doctor.id}
+          loading={loading}
+          emptyMessage="No hay doctores para mostrar"
         />
         <TablePagination
-          currentPage={1}
-          totalPages={1}
-          totalItems={filteredDoctors.length}
-          pageSize={Math.max(filteredDoctors.length, 1)}
+          currentPage={page}
+          totalPages={getTotalPages(total)}
+          totalItems={total}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPage}
+          disabled={loading}
         />
       </Card>
+
+      {formState && (
+        <Modal
+          title={formState.doctor ? 'Editar doctor' : 'Registrar nuevo doctor'}
+          description="Complete todos los campos obligatorios."
+          onClose={closeForm}
+        >
+          <DoctorForm
+            doctor={formState.doctor}
+            specialties={specialties}
+            submitting={submitting}
+            serverError={formError}
+            onSubmit={handleSave}
+            onCancel={closeForm}
+          />
+        </Modal>
+      )}
+
+      {doctorToDelete && (
+        <ConfirmDialog
+          title="Eliminar doctor"
+          message={`¿Seguro que querés eliminar a "${doctorToDelete.name}"?`}
+          confirmLabel="Eliminar"
+          loading={submitting}
+          onConfirm={handleDelete}
+          onCancel={() => setDoctorToDelete(null)}
+        />
+      )}
+
+      {availabilityDoctor && (
+        <DoctorAvailabilityModal
+          doctor={availabilityDoctor}
+          onClose={() => setAvailabilityDoctor(null)}
+          onSaved={handleAvailabilitySaved}
+        />
+      )}
     </div>
   );
 }

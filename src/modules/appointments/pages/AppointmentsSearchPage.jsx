@@ -1,58 +1,54 @@
 import { useState } from 'react';
+import Alert from '../../shared/components/Alert';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
 import PageHeader from '../../shared/components/PageHeader';
-import StatusBadge from '../../shared/components/StatusBadge';
 import Table from '../../shared/components/Table';
 import TablePagination from '../../shared/components/TablePagination';
-
-const appointmentsData = [
-  {
-    id: 1,
-    date: '24/10/2023',
-    time: '10:30',
-    specialty: 'Cardiología',
-    doctor: 'Dr. Robert Smith',
-    patient: 'Johnathan Doe',
-    dni: '40.123.456',
-    status: 'Confirmado',
-    statusType: 'confirmed',
-  },
-  {
-    id: 2,
-    date: '15/10/2023',
-    time: '09:15',
-    specialty: 'Neurología',
-    doctor: 'Dra. García',
-    patient: 'Johnathan Doe',
-    dni: '40.123.456',
-    status: 'Completado',
-    statusType: 'completed',
-  },
-  {
-    id: 3,
-    date: '05/10/2023',
-    time: '11:00',
-    specialty: 'Clínica médica',
-    doctor: 'Dr. Miller',
-    patient: 'Johnathan Doe',
-    dni: '40.123.456',
-    status: 'Cancelado',
-    statusType: 'cancelled',
-  },
-];
-
-const statusTones = {
-  confirmed: 'success',
-  completed: 'neutral',
-  cancelled: 'danger',
-};
+import { getErrorMessage } from '../../shared/helpers/apiError';
+import { formatDate, formatTime } from '../../shared/helpers/dateFormat';
+import { PAGE_SIZE, getTotalPages } from '../../shared/helpers/pagination';
+import {
+  markAppointmentAttended,
+  markAppointmentNoShow,
+} from '../api/appointmentsApi';
+import AppointmentFilters from '../components/AppointmentFilters';
+import AppointmentStatusBadge from '../components/AppointmentStatusBadge';
+import { APPOINTMENT_STATUS } from '../constants/appointmentStatus';
+import useAppointmentsSearch from '../hooks/useAppointmentsSearch';
 
 function AppointmentsSearchPage() {
-  const [patientQuery, setPatientQuery] = useState('');
-  const [specialtyFilter, setSpecialtyFilter] = useState('Todas');
-  const [doctorFilter, setDoctorFilter] = useState('Todos');
-  const [dateFilter, setDateFilter] = useState('');
+  const [filters, setFilters] = useState({});
+  const [page, setPage] = useState(1);
+  const [feedback, setFeedback] = useState(null);
+  const [actingId, setActingId] = useState(null);
+
+  const { data, total, loading, error, reload } = useAppointmentsSearch({
+    ...filters,
+    page,
+    pageSize: PAGE_SIZE,
+  });
+
+  const handleApplyFilters = (newFilters) => {
+    setFilters(newFilters);
+    setPage(1);
+  };
+
+  const changeStatus = async (appointment, request, successText) => {
+    setActingId(appointment.id);
+    setFeedback(null);
+
+    try {
+      await request(appointment.id);
+      setFeedback({ type: 'success', text: successText });
+      reload();
+    } catch (requestError) {
+      // Por ejemplo, una transición de estado inválida: se muestra el error real.
+      setFeedback({ type: 'error', text: getErrorMessage(requestError) });
+    } finally {
+      setActingId(null);
+    }
+  };
 
   const columns = [
     {
@@ -60,9 +56,11 @@ function AppointmentsSearchPage() {
       header: 'Fecha',
       render: (appointment) => (
         <div>
-          <p className="font-bold text-med-primary-900">{appointment.date}</p>
+          <p className="font-bold text-med-primary-900">
+            {formatDate(appointment.date)}
+          </p>
           <p className="text-xs text-med-text-muted mt-0.5">
-            {appointment.time}
+            {formatTime(appointment.startTime)}
           </p>
         </div>
       ),
@@ -73,9 +71,11 @@ function AppointmentsSearchPage() {
       render: (appointment) => (
         <div>
           <p className="font-semibold text-med-primary-900">
-            {appointment.specialty}
+            {appointment.specialtyName || '-'}
           </p>
-          <p className="text-xs text-med-text-muted">{appointment.doctor}</p>
+          <p className="text-xs text-med-text-muted">
+            {appointment.doctorName}
+          </p>
         </div>
       ),
     },
@@ -85,7 +85,7 @@ function AppointmentsSearchPage() {
       render: (appointment) => (
         <div>
           <p className="font-semibold text-med-text-main">
-            {appointment.patient}
+            {appointment.patientName || '-'}
           </p>
           <p className="text-xs text-med-text-muted mt-0.5">
             DNI: {appointment.dni}
@@ -98,24 +98,46 @@ function AppointmentsSearchPage() {
       header: 'Estado',
       align: 'center',
       render: (appointment) => (
-        <StatusBadge tone={statusTones[appointment.statusType]} dot>
-          {appointment.status}
-        </StatusBadge>
+        <AppointmentStatusBadge status={appointment.status} />
       ),
     },
     {
       key: 'actions',
       header: 'Acciones',
       align: 'right',
-      render: (appointment) => (
-        <Button
-          variant="ghost"
-          className="px-2 py-1 text-xs"
-          onClick={() => alert(`Ver detalle de ${appointment.patient}`)}
-        >
-          Ver detalle
-        </Button>
-      ),
+      render: (appointment) =>
+        appointment.status === APPOINTMENT_STATUS.BOOKED ? (
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              variant="ghost"
+              className="px-2 py-1 text-xs"
+              disabled={actingId === appointment.id}
+              onClick={() =>
+                changeStatus(
+                  appointment,
+                  markAppointmentAttended,
+                  'Turno marcado como atendido.'
+                )
+              }
+            >
+              Atendido
+            </Button>
+            <Button
+              variant="ghost"
+              className="px-2 py-1 text-xs text-med-danger-text"
+              disabled={actingId === appointment.id}
+              onClick={() =>
+                changeStatus(
+                  appointment,
+                  markAppointmentNoShow,
+                  'Turno marcado como ausente.'
+                )
+              }
+            >
+              Ausente
+            </Button>
+          </div>
+        ) : null,
     },
   ];
 
@@ -123,61 +145,17 @@ function AppointmentsSearchPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Búsqueda y filtrado de citas"
-        description="Gestione y supervise el flujo de pacientes del departamento."
+        description="Gestione y supervise los turnos de los pacientes."
       />
 
-      <Card className="p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 items-end">
-          <label className="flex flex-col gap-1.5 text-xs font-semibold text-med-text-sub">
-            Paciente o DNI
-            <input
-              type="search"
-              value={patientQuery}
-              onChange={(event) => setPatientQuery(event.target.value)}
-              placeholder="Nombre o DNI..."
-              className="w-full px-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-1 focus:ring-med-primary-600"
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-xs font-semibold text-med-text-sub">
-            Especialidad
-            <select
-              value={specialtyFilter}
-              onChange={(event) => setSpecialtyFilter(event.target.value)}
-              className="w-full px-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main"
-            >
-              <option>Todas</option>
-              <option>Cardiología</option>
-              <option>Neurología</option>
-              <option>Clínica médica</option>
-            </select>
-          </label>
-          <label className="flex flex-col gap-1.5 text-xs font-semibold text-med-text-sub">
-            Doctor
-            <select
-              value={doctorFilter}
-              onChange={(event) => setDoctorFilter(event.target.value)}
-              className="w-full px-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main"
-            >
-              <option>Todos</option>
-              <option>Dr. Robert Smith</option>
-              <option>Dra. García</option>
-              <option>Dr. Miller</option>
-            </select>
-          </label>
-          <label className="flex flex-col gap-1.5 text-xs font-semibold text-med-text-sub">
-            Fecha
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={(event) => setDateFilter(event.target.value)}
-              className="w-full px-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main"
-            />
-          </label>
-          <Button onClick={() => alert('Aplicar filtros')}>
-            Aplicar filtros
-          </Button>
-        </div>
-      </Card>
+      <AppointmentFilters onApply={handleApplyFilters} />
+
+      {feedback && (
+        <Alert type={feedback.type} onClose={() => setFeedback(null)}>
+          {feedback.text}
+        </Alert>
+      )}
+      {error && <Alert>{error}</Alert>}
 
       <Card className="p-0 overflow-hidden border-med-border">
         <div className="p-5 border-b border-med-border">
@@ -187,14 +165,18 @@ function AppointmentsSearchPage() {
         </div>
         <Table
           columns={columns}
-          data={appointmentsData}
-          rowKey={(item) => item.id}
+          data={data}
+          rowKey={(appointment) => appointment.id}
+          loading={loading}
+          emptyMessage="No se encontraron turnos con los filtros aplicados"
         />
         <TablePagination
-          currentPage={1}
-          totalPages={1}
-          totalItems={appointmentsData.length}
-          pageSize={Math.max(appointmentsData.length, 1)}
+          currentPage={page}
+          totalPages={getTotalPages(total)}
+          totalItems={total}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPage}
+          disabled={loading}
         />
       </Card>
     </div>
