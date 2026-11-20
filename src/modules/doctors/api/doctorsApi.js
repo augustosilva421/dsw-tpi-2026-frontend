@@ -43,3 +43,11 @@ export const updateDoctor = async (
 export const deleteDoctor = async (id) => {
   await instance.delete(`${DOCTORS_URL}/${id}`);
 };
+
+export const getAvailableSlots = async (doctorId) => {
+  const { data } = await instance.get(
+    `${DOCTORS_URL}/${doctorId}/available-slots`
+  );
+
+  return data;
+};

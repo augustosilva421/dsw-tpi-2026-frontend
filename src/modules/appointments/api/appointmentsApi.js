@@ -66,3 +66,19 @@ export const markAppointmentAttended = async (id) => {
 export const markAppointmentNoShow = async (id) => {
   await instance.put(`${APPOINTMENTS_URL}/${id}/no-show`);
 };
+
+export const createAppointment = async ({
+  doctorId,
+  availabilitySlotId,
+  dni,
+  reason,
+}) => {
+  const { data } = await instance.post(APPOINTMENTS_URL, {
+    doctorId,
+    availabilitySlotId,
+    patient: { dni: Number(dni) },
+    reason,
+  });
+
+  return data;
+};
