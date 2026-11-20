@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useAuth from '../../auth/hook/useAuth';
+import useAuth from '../../auth/hooks/useAuth';
 import AppointmentStatusBadge from '../../appointments/components/AppointmentStatusBadge';
 import { APPOINTMENT_STATUS } from '../../appointments/constants/appointmentStatus';
 import { cancelAppointment } from '../../appointments/api/patientAppointmentsApi';

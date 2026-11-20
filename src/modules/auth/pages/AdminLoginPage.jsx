@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
-import useAuth from '../hook/useAuth';
-import { getApiErrorMessage } from '../helpers/backendError';
+import { getErrorMessage } from '../../shared/helpers/apiError';
+import useAuth from '../hooks/useAuth';
 
 function AdminLoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
@@ -22,7 +22,7 @@ function AdminLoginPage() {
       await loginAdmin(formData.email, formData.password);
       navigate('/admin/home');
     } catch (error) {
-      setErrorMessage(getApiErrorMessage(error));
+      setErrorMessage(getErrorMessage(error));
     }
   };
 

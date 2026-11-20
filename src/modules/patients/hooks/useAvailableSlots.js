@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getAvailableSlots } from '../../doctors/api/doctorsApi';
-import { getApiErrorMessage } from '../../auth/helpers/backendError';
+import { getErrorMessage } from '../../shared/helpers/apiError';
 
 export const useAvailableSlots = (doctorId) => {
   const [slots, setSlots] = useState([]);
@@ -27,7 +27,7 @@ export const useAvailableSlots = (doctorId) => {
       .catch((err) => {
         if (!ignore) {
           setSlots([]);
-          setError(getApiErrorMessage(err));
+          setError(getErrorMessage(err));
         }
       })
       .finally(() => {

@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import useAuth from '../hook/useAuth';
+import useAuth from '../hooks/useAuth';
 import { ROLES } from '../constants/roles';
 
 const HOME_BY_ROLE = {

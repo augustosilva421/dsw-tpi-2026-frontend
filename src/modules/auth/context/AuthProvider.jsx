@@ -1,6 +1,6 @@
 import { createContext, useState } from 'react';
-import { loginAdmin as loginAdminRequest } from '../services/adminLogin';
-import { loginPatient as loginPatientRequest } from '../services/patientLogin';
+import { loginAdmin as loginAdminRequest } from '../api/adminLogin';
+import { loginPatient as loginPatientRequest } from '../api/patientLogin';
 
 const AuthContext = createContext();
 

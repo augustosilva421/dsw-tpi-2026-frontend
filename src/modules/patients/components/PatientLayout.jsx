@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import useAuth from '../../auth/hook/useAuth';
+import useAuth from '../../auth/hooks/useAuth';
 
 function PatientLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

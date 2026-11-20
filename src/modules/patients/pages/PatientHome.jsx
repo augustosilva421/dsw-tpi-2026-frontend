@@ -3,9 +3,9 @@ import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import { getSpecialties } from '../../specialties/api/specialtiesApi';
 import { getDoctors } from '../../doctors/api/doctorsApi';
-import { getApiErrorMessage } from '../../auth/helpers/backendError';
+import { getErrorMessage } from '../../shared/helpers/apiError';
 import { useNavigate } from 'react-router-dom';
-import useAuth from '../../auth/hook/useAuth';
+import useAuth from '../../auth/hooks/useAuth';
 import { createAppointment } from '../../appointments/api/appointmentsApi';
 
 import { useAvailableSlots } from '../hooks/useAvailableSlots';
@@ -37,7 +37,7 @@ function PatientHome() {
         setSpecialties(specialtiesPage.data);
         setDoctors(doctorsPage.data);
       })
-      .catch((error) => setCatalogError(getApiErrorMessage(error)))
+      .catch((error) => setCatalogError(getErrorMessage(error)))
       .finally(() => setLoadingCatalog(false));
   }, []);
 
@@ -104,7 +104,7 @@ function PatientHome() {
       setReason('');
       reloadSlots();
     } catch (error) {
-      setBookingError(getApiErrorMessage(error));
+      setBookingError(getErrorMessage(error));
     } finally {
       setSubmitting(false);
     }

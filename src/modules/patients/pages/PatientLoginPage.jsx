@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../shared/components/Button';
-import useAuth from '../../auth/hook/useAuth';
-import { getApiErrorMessage } from '../../auth/helpers/backendError';
+import useAuth from '../../auth/hooks/useAuth';
+import { getErrorMessage } from '../../shared/helpers/apiError';
 
 function PatientLoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
@@ -21,7 +21,7 @@ function PatientLoginPage() {
       await loginPatient(formData.email, formData.dni);
       navigate('/');
     } catch (error) {
-      setErrorMessage(getApiErrorMessage(error));
+      setErrorMessage(getErrorMessage(error));
     }
   };
 
