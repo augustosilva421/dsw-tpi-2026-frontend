@@ -19,7 +19,7 @@ function TablePagination({
           type="button"
           onClick={() => onPageChange && onPageChange(currentPage - 1)}
           disabled={disabled || currentPage <= 1}
-          aria-label="Pagina anterior"
+          aria-label="Página anterior"
           className="px-2.5 py-1 border border-med-border rounded bg-white text-med-text-sub hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           ‹
@@ -28,7 +28,7 @@ function TablePagination({
           type="button"
           onClick={() => onPageChange && onPageChange(currentPage + 1)}
           disabled={disabled || currentPage >= totalPages}
-          aria-label="Pagina siguiente"
+          aria-label="Página siguiente"
           className="px-2.5 py-1 border border-med-border rounded bg-white text-med-text-sub hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           ›
