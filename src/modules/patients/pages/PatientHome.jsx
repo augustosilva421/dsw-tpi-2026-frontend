@@ -67,7 +67,7 @@ function PatientHome() {
   const slotsOfActiveDate = slotsByDate[activeDate] ?? [];
   const selectedSlot = slots.find((slot) => slot.id === selectedSlotId) || null;
 
-    const [reason, setReason] = useState('');
+  const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [bookingError, setBookingError] = useState('');
   const [confirmedAppointment, setConfirmedAppointment] = useState(null);
@@ -327,7 +327,7 @@ function PatientHome() {
         </Card>
       )}
 
-            {/* 4. Motivo y resumen de la selección */}
+      {/* 4. Motivo y resumen de la selección */}
       <Card className="p-5 sm:p-6 border-med-border space-y-4">
         <div>
           <label
@@ -390,8 +390,8 @@ function PatientHome() {
           </p>
         )}
       </Card>
-    
-          {confirmedAppointment && (
+
+      {confirmedAppointment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
             <h2 className="text-lg font-extrabold text-med-primary-900">
