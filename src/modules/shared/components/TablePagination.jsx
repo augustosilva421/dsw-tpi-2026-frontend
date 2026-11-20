@@ -3,6 +3,7 @@ function TablePagination({
   totalPages = 1,
   totalItems = 0,
   pageSize = 10,
+  disabled = false,
   onPageChange,
 }) {
   const from = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
@@ -17,7 +18,8 @@ function TablePagination({
         <button
           type="button"
           onClick={() => onPageChange && onPageChange(currentPage - 1)}
-          disabled={currentPage <= 1}
+          disabled={disabled || currentPage <= 1}
+          aria-label="Pagina anterior"
           className="px-2.5 py-1 border border-med-border rounded bg-white text-med-text-sub hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           ‹
@@ -25,7 +27,8 @@ function TablePagination({
         <button
           type="button"
           onClick={() => onPageChange && onPageChange(currentPage + 1)}
-          disabled={currentPage >= totalPages}
+          disabled={disabled || currentPage >= totalPages}
+          aria-label="Pagina siguiente"
           className="px-2.5 py-1 border border-med-border rounded bg-white text-med-text-sub hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           ›
