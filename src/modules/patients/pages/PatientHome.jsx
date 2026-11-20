@@ -29,7 +29,10 @@ function PatientHome() {
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
 
   useEffect(() => {
-    Promise.all([getSpecialties(), getDoctors()])
+    Promise.all([
+      getSpecialties({ pageSize: 100 }),
+      getDoctors({ pageSize: 100 }),
+    ])
       .then(([specialtiesPage, doctorsPage]) => {
         setSpecialties(specialtiesPage.data);
         setDoctors(doctorsPage.data);
