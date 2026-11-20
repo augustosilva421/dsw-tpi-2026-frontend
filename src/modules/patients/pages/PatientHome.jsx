@@ -4,6 +4,9 @@ import Button from '../../shared/components/Button';
 import { getSpecialties } from '../../specialties/api/specialtiesApi';
 import { getDoctors } from '../../doctors/api/doctorsApi';
 import { getApiErrorMessage } from '../../auth/helpers/backendError';
+import { useNavigate } from 'react-router-dom';
+import useAuth from '../../auth/hook/useAuth';
+import { createAppointment } from '../../appointments/api/appointmentsApi';
 
 import { useAvailableSlots } from '../hooks/useAvailableSlots';
 import {
@@ -13,6 +16,9 @@ import {
 } from '../utils/slotHelpers';
 
 function PatientHome() {
+
+  const navigate = useNavigate();
+  const { dni } = useAuth();
 
   const [specialties, setSpecialties] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -47,6 +53,7 @@ function PatientHome() {
     slots,
     loading: loadingSlots,
     error: slotsError,
+    reload: reloadSlots,
   } = useAvailableSlots(selectedDoctorId);
 
   const [selectedDate, setSelectedDate] = useState('');
@@ -59,6 +66,46 @@ function PatientHome() {
     : (availableDates[0] ?? '');
   const slotsOfActiveDate = slotsByDate[activeDate] ?? [];
   const selectedSlot = slots.find((slot) => slot.id === selectedSlotId) || null;
+
+    const [reason, setReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [bookingError, setBookingError] = useState('');
+  const [confirmedAppointment, setConfirmedAppointment] = useState(null);
+
+  const trimmedReason = reason.trim();
+  const reasonIsValid = trimmedReason.length >= 5;
+  const canSubmit =
+    Boolean(currentDoctor) &&
+    Boolean(selectedSlot) &&
+    reasonIsValid &&
+    !submitting;
+
+  const handleConfirmAppointment = async () => {
+    if (!canSubmit) {
+      return;
+    }
+
+    setSubmitting(true);
+    setBookingError('');
+
+    try {
+      const appointment = await createAppointment({
+        doctorId: currentDoctor.id,
+        availabilitySlotId: selectedSlot.id,
+        dni,
+        reason: trimmedReason,
+      });
+
+      setConfirmedAppointment(appointment);
+      setSelectedSlotId('');
+      setReason('');
+      reloadSlots();
+    } catch (error) {
+      setBookingError(getApiErrorMessage(error));
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 max-w-5xl mx-auto">
@@ -280,36 +327,121 @@ function PatientHome() {
         </Card>
       )}
 
-      {/* 4. Resumen de la selección */}
-      <div className="bg-med-primary-50 border border-med-primary-200/60 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="border-l-4 border-med-primary-900 pl-3.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-med-text-sub">
-            Resumen de Selección
-          </span>
-          {selectedSlot ? (
-            <>
-              <p className="text-base sm:text-lg font-bold text-med-primary-900 mt-0.5 capitalize">
-                {formatLongDate(selectedSlot.date)}, {selectedSlot.startTime} hs
-              </p>
-              <p className="text-xs text-med-text-sub mt-0.5">
-                {currentDoctor?.name} • Duración: 30 min
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-med-text-sub mt-0.5">
-              Elegí un horario para continuar.
+            {/* 4. Motivo y resumen de la selección */}
+      <Card className="p-5 sm:p-6 border-med-border space-y-4">
+        <div>
+          <label
+            htmlFor="reason"
+            className="block text-sm font-bold text-med-primary-900 mb-1.5"
+          >
+            Motivo de la consulta
+          </label>
+          <textarea
+            id="reason"
+            rows={3}
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+            maxLength={500}
+            placeholder="Contanos brevemente el motivo del turno (mínimo 5 caracteres)"
+            className="w-full rounded-lg border border-med-border bg-white p-3 text-sm text-med-text-main focus:outline-none focus:ring-2 focus:ring-med-primary-600"
+          />
+          {reason.length > 0 && !reasonIsValid && (
+            <p className="mt-1 text-xs text-red-600">
+              El motivo debe tener al menos 5 caracteres.
             </p>
           )}
         </div>
 
-        <Button
-          type="button"
-          disabled
-          className="shrink-0 py-3 px-6 rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Confirmar Turno
-        </Button>
-      </div>
+        <div className="bg-med-primary-50 border border-med-primary-200/60 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="border-l-4 border-med-primary-900 pl-3.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-med-text-sub">
+              Resumen de Selección
+            </span>
+            {selectedSlot ? (
+              <>
+                <p className="text-base sm:text-lg font-bold text-med-primary-900 mt-0.5 capitalize">
+                  {formatLongDate(selectedSlot.date)}, {selectedSlot.startTime}{' '}
+                  hs
+                </p>
+                <p className="text-xs text-med-text-sub mt-0.5">
+                  {currentDoctor?.name} • Duración: 30 min
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-med-text-sub mt-0.5">
+                Elegí un horario para continuar.
+              </p>
+            )}
+          </div>
+
+          <Button
+            type="button"
+            onClick={handleConfirmAppointment}
+            disabled={!canSubmit}
+            className="shrink-0 py-3 px-6 rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {submitting ? 'Reservando...' : 'Confirmar Turno'}
+          </Button>
+        </div>
+
+        {bookingError && (
+          <p className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600">
+            {bookingError}
+          </p>
+        )}
+      </Card>
+    
+          {confirmedAppointment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="text-lg font-extrabold text-med-primary-900">
+              ¡Turno confirmado!
+            </h2>
+
+            <dl className="mt-4 space-y-2 text-sm">
+              <div>
+                <dt className="text-xs font-bold uppercase text-med-text-sub">
+                  Profesional
+                </dt>
+                <dd className="text-med-text-main">
+                  {confirmedAppointment.doctor.name}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs font-bold uppercase text-med-text-sub">
+                  Fecha y hora
+                </dt>
+                <dd className="text-med-text-main capitalize">
+                  {formatLongDate(confirmedAppointment.slot.date)},{' '}
+                  {confirmedAppointment.slot.startTime} hs
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs font-bold uppercase text-med-text-sub">
+                  Motivo
+                </dt>
+                <dd className="text-med-text-main">
+                  {confirmedAppointment.reason}
+                </dd>
+              </div>
+            </dl>
+
+            <div className="mt-6 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setConfirmedAppointment(null)}
+              >
+                Reservar otro turno
+              </Button>
+              <Button type="button" onClick={() => navigate('/appointments')}>
+                Ver Mis Turnos
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
