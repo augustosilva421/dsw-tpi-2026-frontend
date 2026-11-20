@@ -1,4 +1,16 @@
 import axios from 'axios';
+import { ROLES } from '../../auth/constants/roles';
+
+const LOGIN_PATHS = ['/auth/admin/login', '/auth/patient/login'];
+
+const isLoginRequest = (url = '') =>
+  LOGIN_PATHS.some((path) => url.includes(path));
+
+const clearSession = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('role');
+  localStorage.removeItem('dni');
+};
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
@@ -19,16 +31,22 @@ instance.interceptors.request.use(
 );
 
 instance.interceptors.response.use(
-  (config) => {
-    return config;
-  },
+  (response) => response,
   (error) => {
-    if (error.status === 401) {
-      if (window.location.pathname.includes('/admin/')) {
-        localStorage.clear();
-        window.location.href = '/login';
-      } else {
-        localStorage.removeItem('token');
+    const status = error.response?.status;
+    const role = localStorage.getItem('role');
+    const isAdmin = role === ROLES.ADMIN;
+
+    if (status === 401 && !isLoginRequest(error.config?.url)) {
+      clearSession();
+      window.location.href = isAdmin ? '/admin/login' : '/login';
+    }
+
+    if (status === 403) {
+      const home = isAdmin ? '/admin/home' : '/';
+
+      if (window.location.pathname !== home) {
+        window.location.href = home;
       }
     }
 
