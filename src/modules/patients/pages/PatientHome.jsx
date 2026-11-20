@@ -344,7 +344,7 @@ function PatientHome() {
             rows={3}
             value={reason}
             onChange={(event) => setReason(event.target.value)}
-            maxLength={500}
+            maxLength={300}
             placeholder="Contanos brevemente el motivo del turno (mínimo 5 caracteres)"
             className="w-full rounded-lg border border-med-border bg-white p-3 text-sm text-med-text-main focus:outline-none focus:ring-2 focus:ring-med-primary-600"
           />
