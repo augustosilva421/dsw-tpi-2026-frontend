@@ -42,6 +42,7 @@ function AppointmentFilters({ onApply }) {
 
     if (dni && !DNI_REGEX.test(dni)) {
       setDniError('El DNI debe tener entre 7 y 10 dígitos.');
+
       return;
     }
 

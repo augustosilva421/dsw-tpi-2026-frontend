@@ -1,8 +1,5 @@
 import { instance } from '../../shared/api/axiosInstance';
 import { PAGE_SIZE, toBackendPage } from '../../shared/helpers/pagination';
-import { getPatientAppointments } from '../api/patientAppointmentsApi';
-import { cancelAppointment } from '../api/patientAppointmentsApi';
-import { createAppointment } from '../api/patientAppointmentsApi';
 
 const APPOINTMENTS_URL = 'api/appointments';
 
@@ -31,12 +28,7 @@ const mapAppointment = (raw) => {
       ''
     ),
     date: pick(slot.date, slot.slotDate, dateTime?.split('T')[0], raw.date, ''),
-    startTime: pick(
-      slot.startTime,
-      dateTime?.split('T')[1],
-      raw.startTime,
-      ''
-    ),
+    startTime: pick(slot.startTime, dateTime?.split('T')[1], raw.startTime, ''),
   };
 };
 
@@ -51,8 +43,11 @@ export const searchAppointments = async ({
   const params = { pageIndex: toBackendPage(page), pageSize };
 
   if (specialtyId) params.specialtyId = specialtyId;
+
   if (doctorId) params.doctorId = doctorId;
+
   if (dni) params.dni = dni;
+
   if (date) params.date = date;
 
   const { data } = await instance.get(`${APPOINTMENTS_URL}/search`, {

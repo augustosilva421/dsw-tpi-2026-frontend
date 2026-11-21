@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hooks/useAuth';
 import AppointmentStatusBadge from '../../appointments/components/AppointmentStatusBadge';
 import { APPOINTMENT_STATUS } from '../../appointments/constants/appointmentStatus';
-import { cancelAppointment } from '../../appointments/api/patientAppointmentsApi';
+import { cancelAppointment } from '../api/patientAppointmentsApi';
 import Alert from '../../shared/components/Alert';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
@@ -11,6 +11,7 @@ import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { getErrorMessage } from '../../shared/helpers/apiError';
 import { formatDate, formatTime } from '../../shared/helpers/dateFormat';
 import { usePatientAppointments } from '../hooks/usePatientAppointments';
+import { ROUTES } from '../../shared/constants/routes';
 
 function AppointmentsPage() {
   const navigate = useNavigate();
@@ -52,7 +53,9 @@ function AppointmentsPage() {
             Consultá y gestioná tus citas médicas reservadas.
           </p>
         </div>
-        <Button onClick={() => navigate(ROUTES.PATIENT_HOME)}>+ Solicitar Nuevo Turno</Button>
+        <Button onClick={() => navigate(ROUTES.PATIENT_HOME)}>
+          + Solicitar Nuevo Turno
+        </Button>
       </div>
 
       {successMessage && (

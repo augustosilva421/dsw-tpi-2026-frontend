@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getPatientAppointments } from '../../appointments/api/patientAppointmentsApi';
+import { getPatientAppointments } from '../api/patientAppointmentsApi';
 import { getErrorMessage } from '../../shared/helpers/apiError';
 
 export const usePatientAppointments = (dni) => {

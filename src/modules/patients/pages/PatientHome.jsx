@@ -39,19 +39,6 @@ function PatientHome() {
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState('');
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
 
-  useEffect(() => {
-    Promise.all([
-      getSpecialties({ pageSize: 100 }),
-      getDoctors({ pageSize: 100 }),
-    ])
-      .then(([specialtiesPage, doctorsPage]) => {
-        setSpecialties(specialtiesPage.data);
-        setDoctors(doctorsPage.data);
-      })
-      .catch((error) => setCatalogError(getErrorMessage(error)))
-      .finally(() => setLoadingCatalog(false));
-  }, []);
-
   const doctorsOfSpecialty = doctors.filter(
     (doc) => doc.specialty?.id === selectedSpecialtyId
   );
@@ -402,14 +389,16 @@ function PatientHome() {
               >
                 Reservar otro turno
               </Button>
-              <Button type="button" onClick={() => navigate(ROUTES.PATIENT_APPOINTMENTS)}>
+              <Button
+                type="button"
+                onClick={() => navigate(ROUTES.PATIENT_APPOINTMENTS)}
+              >
                 Ver Mis Turnos
               </Button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

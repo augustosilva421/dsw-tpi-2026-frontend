@@ -45,6 +45,7 @@ function AvailabilityForm({ doctor, existingDays, onCancel, onSaved }) {
 
     if (selected.length === 0) {
       setFormError('Seleccioná al menos un día de atención.');
+
       return;
     }
 
@@ -56,6 +57,7 @@ function AvailabilityForm({ doctor, existingDays, onCancel, onSaved }) {
       setFormError(
         `En ${invalid.label} la hora de salida debe ser posterior a la de entrada.`
       );
+
       return;
     }
 
@@ -153,7 +155,9 @@ function DoctorAvailabilityModal({ doctor, onClose, onSaved }) {
       onClose={onClose}
     >
       {loading && (
-        <p className="text-sm text-med-text-muted">Cargando disponibilidad...</p>
+        <p className="text-sm text-med-text-muted">
+          Cargando disponibilidad...
+        </p>
       )}
       {!loading && error && <Alert>{error}</Alert>}
       {!loading && !error && (

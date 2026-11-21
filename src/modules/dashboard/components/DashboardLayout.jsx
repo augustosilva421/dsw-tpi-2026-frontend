@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hooks/useAuth';
 import { getInitials } from '../../shared/helpers/userDisplay';
+import { ROUTES } from '../../shared/constants/routes';
 
 function DashboardLayout() {
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
@@ -167,8 +168,12 @@ function DashboardLayout() {
               {getInitials(email ?? '')}
             </div>
             <div className="overflow-hidden">
-              <p className="text-xs font-semibold text-med-text-main truncate">{email}</p>
-              <p className="text-[11px] text-med-text-muted truncate">Administrador</p>
+              <p className="text-xs font-semibold text-med-text-main truncate">
+                {email}
+              </p>
+              <p className="text-[11px] text-med-text-muted truncate">
+                Administrador
+              </p>
             </div>
           </div>
         </div>

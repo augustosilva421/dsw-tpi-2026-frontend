@@ -30,9 +30,11 @@ export const getErrorMessage = (error) => {
   }
 
   const { status, data } = error.response;
+
   if (FIXED_MESSAGES_BY_STATUS[status]) {
     return FIXED_MESSAGES_BY_STATUS[status];
   }
+
   const base =
     data?.message ||
     data?.title ||

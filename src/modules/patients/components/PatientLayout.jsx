@@ -28,7 +28,10 @@ function PatientLayout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           {/* Logo y Enlaces Desktop */}
           <div className="flex items-center gap-6 sm:gap-8">
-            <NavLink to={ROUTES.PATIENT_HOME} className="flex items-center gap-2.5">
+            <NavLink
+              to={ROUTES.PATIENT_HOME}
+              className="flex items-center gap-2.5"
+            >
               <div className="w-8 h-8 rounded-lg bg-med-primary-900 text-white flex items-center justify-center font-bold text-xs shadow-xs">
                 <svg
                   className="w-4 h-4"
@@ -54,7 +57,10 @@ function PatientLayout() {
               <NavLink to={ROUTES.PATIENT_HOME} end className={getNavLinkClass}>
                 Reservar Turno
               </NavLink>
-              <NavLink to={ROUTES.PATIENT_APPOINTMENTS} className={getNavLinkClass}>
+              <NavLink
+                to={ROUTES.PATIENT_APPOINTMENTS}
+                className={getNavLinkClass}
+              >
                 Mis Turnos
               </NavLink>
             </nav>
@@ -62,7 +68,6 @@ function PatientLayout() {
 
           {/* Acciones Derecha Desktop / Mobile Avatar */}
           <div className="flex items-center gap-2 sm:gap-4">
-            
             {/* Avatar Paciente */}
             <div className="flex items-center gap-2.5 pl-2 sm:border-l sm:border-med-border">
               <div className="w-8 h-8 rounded-full bg-med-primary-100 text-med-primary-900 font-bold text-xs flex items-center justify-center border border-med-primary-200">
