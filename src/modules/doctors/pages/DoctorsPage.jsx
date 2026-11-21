@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { generatePath, useLocation, useNavigate } from 'react-router-dom';
 import Alert from '../../shared/components/Alert';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
@@ -8,27 +9,27 @@ import PageHeader from '../../shared/components/PageHeader';
 import StatusBadge from '../../shared/components/StatusBadge';
 import Table from '../../shared/components/Table';
 import TablePagination from '../../shared/components/TablePagination';
+import { ROUTES } from '../../shared/constants/routes';
 import { getErrorMessage } from '../../shared/helpers/apiError';
 import { normalizeNameFilter } from '../../shared/helpers/nameFilter';
 import { PAGE_SIZE, getTotalPages } from '../../shared/helpers/pagination';
 import useDebouncedValue from '../../shared/hooks/useDebouncedValue';
 import useSpecialties from '../../specialties/hooks/useSpecialties';
-import { createDoctor, deleteDoctor, updateDoctor } from '../api/doctorsApi';
-import DoctorAvailabilityModal from '../components/DoctorAvailabilityModal';
+import { deleteDoctor, updateDoctor } from '../api/doctorsApi';
 import DoctorForm from '../components/DoctorForm';
 import useDoctors from '../hooks/useDoctors';
 
 const SPECIALTY_OPTIONS_LIMIT = 100;
 
 function DoctorsPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [formState, setFormState] = useState(null); // { doctor } | null
   const [doctorToDelete, setDoctorToDelete] = useState(null);
-  const [availabilityDoctor, setAvailabilityDoctor] = useState(null);
-  const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState(null);
+  const [feedback, setFeedback] = useState(location.state?.feedback ?? null);
 
   const debouncedSearch = useDebouncedValue(searchTerm);
   const name = normalizeNameFilter(debouncedSearch);
@@ -48,39 +49,17 @@ function DoctorsPage() {
     setPage(1);
   };
 
-  const openForm = (doctor = null) => {
-    setFormError('');
+  const openForm = (doctor) => {
     setFormState({ doctor });
   };
 
   const closeForm = () => setFormState(null);
 
   const handleSave = async (values) => {
-    const { doctor } = formState;
-
-    setSubmitting(true);
-    setFormError('');
-
-    try {
-      if (doctor) {
-        await updateDoctor(doctor.id, values);
-      } else {
-        await createDoctor(values);
-      }
-
-      setFormState(null);
-      setFeedback({
-        type: 'success',
-        text: doctor
-          ? 'Doctor actualizado correctamente.'
-          : 'Doctor creado correctamente.',
-      });
-      reload();
-    } catch (requestError) {
-      setFormError(getErrorMessage(requestError));
-    } finally {
-      setSubmitting(false);
-    }
+    await updateDoctor(formState.doctor.id, values);
+    setFormState(null);
+    setFeedback({ type: 'success', text: 'Doctor actualizado correctamente.' });
+    reload();
   };
 
   const handleDelete = async () => {
@@ -101,14 +80,6 @@ function DoctorsPage() {
       setDoctorToDelete(null);
       setSubmitting(false);
     }
-  };
-
-  const handleAvailabilitySaved = () => {
-    setAvailabilityDoctor(null);
-    setFeedback({
-      type: 'success',
-      text: 'Disponibilidad horaria guardada correctamente.',
-    });
   };
 
   const columns = [
@@ -147,7 +118,13 @@ function DoctorsPage() {
           <Button
             variant="ghost"
             className="px-2 py-1 text-xs"
-            onClick={() => setAvailabilityDoctor(doctor)}
+            onClick={() =>
+              navigate(
+                generatePath(ROUTES.ADMIN_DOCTOR_AVAILABILITY, {
+                  doctorId: doctor.id,
+                })
+              )
+            }
           >
             Disponibilidad
           </Button>
@@ -185,7 +162,7 @@ function DoctorsPage() {
               placeholder="Buscar doctor (mín. 3 letras)..."
               className="min-w-[220px] px-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-1 focus:ring-med-primary-600"
             />
-            <Button disabled={specialtiesLoading} onClick={() => openForm()}>
+            <Button onClick={() => navigate(ROUTES.ADMIN_DOCTOR_CREATE)}>
               + Nuevo doctor
             </Button>
           </>
@@ -224,15 +201,13 @@ function DoctorsPage() {
 
       {formState && (
         <Modal
-          title={formState.doctor ? 'Editar doctor' : 'Registrar nuevo doctor'}
+          title="Editar doctor"
           description="Complete todos los campos obligatorios."
           onClose={closeForm}
         >
           <DoctorForm
             doctor={formState.doctor}
             specialties={specialties}
-            submitting={submitting}
-            serverError={formError}
             onSubmit={handleSave}
             onCancel={closeForm}
           />
@@ -247,14 +222,6 @@ function DoctorsPage() {
           loading={submitting}
           onConfirm={handleDelete}
           onCancel={() => setDoctorToDelete(null)}
-        />
-      )}
-
-      {availabilityDoctor && (
-        <DoctorAvailabilityModal
-          doctor={availabilityDoctor}
-          onClose={() => setAvailabilityDoctor(null)}
-          onSaved={handleAvailabilitySaved}
         />
       )}
     </div>

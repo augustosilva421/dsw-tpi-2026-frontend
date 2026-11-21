@@ -1,28 +1,18 @@
-import { useForm } from 'react-hook-form';
+import FormActions from '../../shared/components/FormActions';
+import useDoctorForm from '../hooks/useDoctorForm';
 import Alert from '../../shared/components/Alert';
 import Button from '../../shared/components/Button';
 import Input from '../../shared/components/Input';
 import Select from '../../shared/components/Select';
+import Icon from '../../shared/components/Icon';
+import { ICON_PATHS } from '../../shared/constants/iconPaths';
 
-function DoctorForm({
-  doctor,
-  specialties,
-  submitting,
-  serverError,
-  onSubmit,
-  onCancel,
-}) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      name: doctor?.name ?? '',
-      licenseNumber: doctor?.licenseNumber ?? '',
-      specialtyId: doctor?.specialty?.id ?? doctor?.specialtyId ?? '',
-    },
+function DoctorForm({ doctor, specialties, onSubmit, onCancel }) {
+  const { register, errors, submitting, handleSubmit } = useDoctorForm({
+    doctor,
+    onSubmit,
   });
+  const serverError = errors.root?.server?.message;
 
   if (specialties.length === 0) {
     return (
@@ -41,28 +31,26 @@ function DoctorForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <Input
-        label="Nombre completo del doctor"
-        placeholder="Ej. Dr. Alejandro Martínez"
-        error={errors.name?.message}
-        {...register('name', {
-          required: 'El nombre es obligatorio.',
-          minLength: { value: 3, message: 'Mínimo 3 caracteres.' },
-          maxLength: { value: 100, message: 'Máximo 100 caracteres.' },
-        })}
-      />
-      <Input
-        label="Número de matrícula"
-        placeholder="Ej. MP-45920"
-        error={errors.licenseNumber?.message}
-        {...register('licenseNumber', {
-          required: 'La matrícula es obligatoria.',
-          maxLength: { value: 50, message: 'Máximo 50 caracteres.' },
-        })}
-      />
+    <form
+      onSubmit={handleSubmit}
+      className="grid grid-cols-1 gap-6 sm:grid-cols-2"
+    >
+      <div className="sm:col-span-2">
+        <Input
+          label="Nombre completo del doctor"
+          icon={<Icon path={ICON_PATHS.user} />}
+          placeholder="Ej. Dr. Alejandro Martínez"
+          error={errors.name?.message}
+          {...register('name', {
+            required: 'El nombre es obligatorio.',
+            minLength: { value: 3, message: 'Mínimo 3 caracteres.' },
+            maxLength: { value: 100, message: 'Máximo 100 caracteres.' },
+          })}
+        />
+      </div>
       <Select
         label="Especialidad"
+        icon={<Icon path={ICON_PATHS.specialty} />}
         error={errors.specialtyId?.message}
         {...register('specialtyId', {
           required: 'Seleccioná una especialidad.',
@@ -75,17 +63,29 @@ function DoctorForm({
           </option>
         ))}
       </Select>
+      <Input
+        label="Número de Licencia Médica"
+        icon={<Icon path={ICON_PATHS.license} />}
+        placeholder="Ej. MP-45920"
+        error={errors.licenseNumber?.message}
+        {...register('licenseNumber', {
+          required: 'La matrícula es obligatoria.',
+          maxLength: { value: 50, message: 'Máximo 50 caracteres.' },
+        })}
+      />
 
-      {serverError && <Alert>{serverError}</Alert>}
+      {serverError && (
+        <div className="sm:col-span-2">
+          <Alert>{serverError}</Alert>
+        </div>
+      )}
 
-      <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={onCancel} disabled={submitting}>
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={submitting}>
-          {submitting ? 'Guardando...' : 'Guardar doctor'}
-        </Button>
-      </div>
+      <FormActions
+        className="sm:col-span-2"
+        onCancel={onCancel}
+        submitting={submitting}
+        submitLabel="Guardar Doctor"
+      />
     </form>
   );
 }
