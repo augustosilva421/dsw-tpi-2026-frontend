@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
-import Card from '../../shared/components/Card';
-import Button from '../../shared/components/Button';
-import { getSpecialties } from '../../specialties/api/specialtiesApi';
-import { getDoctors } from '../../doctors/api/doctorsApi';
-import { getErrorMessage } from '../../shared/helpers/apiError';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hooks/useAuth';
-import { createAppointment } from '../../appointments/api/appointmentsApi';
-
+import useDoctors from '../../doctors/hooks/useDoctors';
+import Button from '../../shared/components/Button';
+import Card from '../../shared/components/Card';
+import Select from '../../shared/components/Select';
+import { ROUTES } from '../../shared/constants/routes';
+import { getErrorMessage } from '../../shared/helpers/apiError';
+import useSpecialties from '../../specialties/hooks/useSpecialties';
+import { createAppointment } from '../api/patientAppointmentsApi';
 import { useAvailableSlots } from '../hooks/useAvailableSlots';
 import {
   groupSlotsByDate,
@@ -15,15 +16,25 @@ import {
   formatLongDate,
 } from '../utils/slotHelpers';
 
-function PatientHome() {
+const CATALOG_LIMIT = 100;
 
+function PatientHome() {
   const navigate = useNavigate();
   const { dni } = useAuth();
 
-  const [specialties, setSpecialties] = useState([]);
-  const [doctors, setDoctors] = useState([]);
-  const [loadingCatalog, setLoadingCatalog] = useState(true);
-  const [catalogError, setCatalogError] = useState('');
+  const {
+    data: specialties,
+    loading: loadingSpecialties,
+    error: specialtiesError,
+  } = useSpecialties({ pageSize: CATALOG_LIMIT });
+  const {
+    data: doctors,
+    loading: loadingDoctors,
+    error: doctorsError,
+  } = useDoctors({ pageSize: CATALOG_LIMIT });
+
+  const loadingCatalog = loadingSpecialties || loadingDoctors;
+  const catalogError = specialtiesError || doctorsError;
 
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState('');
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
@@ -129,88 +140,42 @@ function PatientHome() {
           </p>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          {/* Especialidad */}
-          <div className="md:col-span-5 flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-med-text-sub">
-              Seleccionar Especialidad
-            </label>
-            <div className="relative">
-              <select
-                value={selectedSpecialtyId}
-                onChange={(e) => handleSpecialtyChange(e.target.value)}
-                disabled={loadingCatalog || specialties.length === 0}
-                className="...(dejá el que ya tenés)..."
-              >
-                <option value="">
-                  {loadingCatalog ? 'Cargando...' : 'Seleccione una especialidad'}
-                </option>
-                {specialties.map((specialty) => (
-                  <option key={specialty.id} value={specialty.id}>
-                    {specialty.name}
-                  </option>
-                ))}
-              </select>
-              <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-med-text-muted">
-                ▼
-              </span>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Select
+            label="Seleccionar Especialidad"
+            value={selectedSpecialtyId}
+            onChange={(event) => handleSpecialtyChange(event.target.value)}
+            disabled={loadingCatalog || specialties.length === 0}
+          >
+            <option value="">
+              {loadingCatalog ? 'Cargando...' : 'Seleccione una especialidad'}
+            </option>
+            {specialties.map((specialty) => (
+              <option key={specialty.id} value={specialty.id}>
+                {specialty.name}
+              </option>
+            ))}
+          </Select>
 
-          {/* Doctor */}
-          <div className="md:col-span-4 flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-med-text-sub">
-              Seleccionar Doctor
-            </label>
-            <div className="relative">
-              <select
-                value={selectedDoctorId}
-                onChange={(e) => setSelectedDoctorId(e.target.value)}
-                disabled={!selectedSpecialtyId || doctorsOfSpecialty.length === 0}
-                className="...(dejá el que ya tenés)..."
-              >
-                <option value="">
-                  {!selectedSpecialtyId
-                    ? 'Primero elija una especialidad'
-                    : doctorsOfSpecialty.length === 0
-                      ? 'No hay doctores para esta especialidad'
-                      : 'Seleccione un doctor'}
-                </option>
-                {doctorsOfSpecialty.map((doc) => (
-                  <option key={doc.id} value={doc.id}>
-                    {doc.name}
-                  </option>
-                ))}
-              </select>
-              <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-med-text-muted">
-                ▼
-              </span>
-            </div>
-          </div>
-
-          {/* Botón Buscar Disponibilidad */}
-          <div className="md:col-span-3">
-            <Button
-              type="button"
-              className="w-full flex items-center justify-center gap-2 bg-med-primary-900 hover:bg-med-primary-800 text-white font-medium py-2.5 rounded-lg shadow-sm"
-              onClick={() => {}}
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <span>Buscar Disponibilidad</span>
-            </Button>
-          </div>
+          <Select
+            label="Seleccionar Doctor"
+            value={selectedDoctorId}
+            onChange={(event) => setSelectedDoctorId(event.target.value)}
+            disabled={!selectedSpecialtyId || doctorsOfSpecialty.length === 0}
+          >
+            <option value="">
+              {!selectedSpecialtyId
+                ? 'Primero elija una especialidad'
+                : doctorsOfSpecialty.length === 0
+                  ? 'No hay doctores para esta especialidad'
+                  : 'Seleccione un doctor'}
+            </option>
+            {doctorsOfSpecialty.map((doc) => (
+              <option key={doc.id} value={doc.id}>
+                {doc.name}
+              </option>
+            ))}
+          </Select>
         </div>
       </Card>
 
