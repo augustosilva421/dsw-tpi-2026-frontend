@@ -30,7 +30,7 @@ function Select({
           id={inputId}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${inputId}-error` : undefined}
-          className={`w-full border rounded-lg px-3.5 py-2.5 text-sm bg-white text-med-text-main transition focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent ${
+          className={`w-full border rounded-lg px-3.5 py-2.5 text-sm bg-white text-med-text-main transition focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-med-text-muted disabled:opacity-70 ${
             error ? 'border-red-400 bg-red-50/20' : 'border-med-border'
           } ${icon ? 'pl-9' : ''} ${className}`}
           {...restProps}

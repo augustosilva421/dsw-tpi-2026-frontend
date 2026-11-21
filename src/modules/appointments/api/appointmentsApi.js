@@ -13,12 +13,13 @@ const mapAppointment = (raw) => {
   return {
     id: pick(raw.appointmentsId, raw.id),
     status: pick(raw.appointmentsStatus, raw.status),
-    patientName: pick(
-      raw.patient?.fullName,
-      raw.patient?.name,
-      raw.patientName,
-      ''
-    ),
+    patientName:
+      [
+        raw.patient?.fullName,
+        raw.patient?.name,
+        raw.patient?.email,
+        raw.patientName,
+      ].find((value) => typeof value === 'string' && value.trim()) ?? '',
     dni: pick(raw.patient?.dni, raw.dni, ''),
     doctorName: pick(raw.doctor?.name, raw.doctorName, ''),
     specialtyName: pick(
