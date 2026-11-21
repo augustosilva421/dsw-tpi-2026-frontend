@@ -1,17 +1,12 @@
 import axios from 'axios';
 import { ROLES } from '../constants/roles';
 import { ROUTES } from '../constants/routes';
+import { clearSession, readSession } from '../helpers/authSession';
 
 const LOGIN_PATHS = ['/auth/admin/login', '/auth/patient/login'];
 
 const isLoginRequest = (url = '') =>
   LOGIN_PATHS.some((path) => url.includes(path));
-
-const clearSession = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('role');
-  localStorage.removeItem('dni');
-};
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
@@ -20,7 +15,7 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const { token } = readSession();
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -35,12 +30,13 @@ instance.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
-    const role = localStorage.getItem('role');
-    const isAdmin = role === ROLES.ADMIN;
+    const isAdmin = readSession().role === ROLES.ADMIN;
 
     if (status === 401 && !isLoginRequest(error.config?.url)) {
       clearSession();
-      window.location.href = isAdmin ? ROUTES.ADMIN_LOGIN : ROUTES.PATIENT_LOGIN;
+      window.location.href = isAdmin
+        ? ROUTES.ADMIN_LOGIN
+        : ROUTES.PATIENT_LOGIN;
     }
 
     if (status === 403) {
