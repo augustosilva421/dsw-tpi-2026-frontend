@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hooks/useAuth';
 import { ROUTES } from '../../shared/constants/routes';
+import { getInitials } from '../../shared/helpers/userDisplay';
 
 function PatientLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { email, logout } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -61,35 +62,14 @@ function PatientLayout() {
 
           {/* Acciones Derecha Desktop / Mobile Avatar */}
           <div className="flex items-center gap-2 sm:gap-4">
-            {/* Iconos sutiles como en el mock */}
-            <button
-              type="button"
-              title="Notificaciones"
-              onClick={() => alert('No tienes notificaciones pendientes')}
-              className="hidden sm:flex p-2 rounded-lg text-med-text-muted hover:text-med-primary-900 hover:bg-gray-50 transition"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
-            </button>
-
+            
             {/* Avatar Paciente */}
             <div className="flex items-center gap-2.5 pl-2 sm:border-l sm:border-med-border">
               <div className="w-8 h-8 rounded-full bg-med-primary-100 text-med-primary-900 font-bold text-xs flex items-center justify-center border border-med-primary-200">
-                JD
+                {getInitials(email ?? '')}
               </div>
-              <span className="hidden sm:inline-block text-xs font-semibold text-med-text-main">
-                Johnathan Doe
+              <span className="hidden sm:inline-block max-w-[180px] truncate text-xs font-semibold text-med-text-main">
+                {email ?? 'Paciente'}
               </span>
             </div>
 
@@ -154,8 +134,8 @@ function PatientLayout() {
               Mis Turnos
             </NavLink>
             <div className="pt-2 border-t border-med-border-subtle flex items-center justify-between">
-              <span className="text-xs font-medium text-med-text-sub">
-                Paciente: Johnathan Doe
+              <span className="text-xs font-medium text-med-text-sub truncate">
+                Paciente: {email}
               </span>
               <button
                 onClick={handleLogout}

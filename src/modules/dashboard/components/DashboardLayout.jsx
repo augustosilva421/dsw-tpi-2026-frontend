@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import useAuth from '../../auth/hooks/useAuth';
+import { getInitials } from '../../shared/helpers/userDisplay';
 
 function DashboardLayout() {
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { email, logout } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -163,15 +164,11 @@ function DashboardLayout() {
           {/* User Profile Info */}
           <div className="pt-3 border-t border-med-border flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-med-primary-100 text-med-primary-900 flex items-center justify-center font-bold text-xs">
-              AD
+              {getInitials(email ?? '')}
             </div>
             <div className="overflow-hidden">
-              <p className="text-xs font-semibold text-med-text-main truncate">
-                Admin User
-              </p>
-              <p className="text-[11px] text-med-text-muted truncate">
-                Super Administrator
-              </p>
+              <p className="text-xs font-semibold text-med-text-main truncate">{email}</p>
+              <p className="text-[11px] text-med-text-muted truncate">Administrador</p>
             </div>
           </div>
         </div>
