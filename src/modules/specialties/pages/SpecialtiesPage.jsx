@@ -4,11 +4,13 @@ import Alert from '../../shared/components/Alert';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
+import IconButton from '../../shared/components/IconButton';
 import Modal from '../../shared/components/Modal';
 import PageHeader from '../../shared/components/PageHeader';
 import Table from '../../shared/components/Table';
 import TablePagination from '../../shared/components/TablePagination';
 import { ROUTES } from '../../shared/constants/routes';
+import { ICON_PATHS } from '../../shared/constants/iconPaths';
 import { getErrorMessage } from '../../shared/helpers/apiError';
 import { normalizeNameFilter } from '../../shared/helpers/nameFilter';
 import { PAGE_SIZE, getTotalPages } from '../../shared/helpers/pagination';
@@ -64,7 +66,6 @@ function SpecialtiesPage() {
       await deleteSpecialty(specialtyToDelete.id);
       setFeedback({ type: 'success', text: 'Especialidad eliminada.' });
 
-      // Si se borró el último registro de la página, volver a la anterior.
       if (data.length === 1 && page > 1) {
         setPage(page - 1);
       } else {
@@ -99,20 +100,17 @@ function SpecialtiesPage() {
       align: 'right',
       render: (specialty) => (
         <div className="flex items-center justify-end gap-2">
-          <Button
-            variant="ghost"
-            className="px-2 py-1 text-xs"
+          <IconButton
+            label={`Editar especialidad ${specialty.name}`}
+            path={ICON_PATHS.edit}
             onClick={() => openForm(specialty)}
-          >
-            Editar
-          </Button>
-          <Button
-            variant="ghost"
-            className="px-2 py-1 text-xs text-med-danger-text"
+          />
+          <IconButton
+            label={`Eliminar especialidad ${specialty.name}`}
+            path={ICON_PATHS.trash}
+            danger
             onClick={() => setSpecialtyToDelete(specialty)}
-          >
-            Eliminar
-          </Button>
+          />
         </div>
       ),
     },

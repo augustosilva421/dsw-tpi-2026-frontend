@@ -7,6 +7,7 @@ export const ROUTES = {
   ADMIN_HOME: '/admin/home',
   ADMIN_DOCTORS: '/admin/doctors',
   ADMIN_DOCTOR_CREATE: '/admin/doctors/new',
+  ADMIN_AVAILABILITY: '/admin/doctors/availability',
   ADMIN_DOCTOR_AVAILABILITY: '/admin/doctors/:doctorId/availability',
   ADMIN_SPECIALTIES: '/admin/specialties',
   ADMIN_SPECIALTY_CREATE: '/admin/specialties/new',

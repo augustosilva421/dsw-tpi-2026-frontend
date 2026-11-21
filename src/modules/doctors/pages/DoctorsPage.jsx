@@ -4,12 +4,15 @@ import Alert from '../../shared/components/Alert';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
+import Icon from '../../shared/components/Icon';
+import IconButton from '../../shared/components/IconButton';
 import Modal from '../../shared/components/Modal';
 import PageHeader from '../../shared/components/PageHeader';
 import StatusBadge from '../../shared/components/StatusBadge';
 import Table from '../../shared/components/Table';
 import TablePagination from '../../shared/components/TablePagination';
 import { ROUTES } from '../../shared/constants/routes';
+import { ICON_PATHS } from '../../shared/constants/iconPaths';
 import { getErrorMessage } from '../../shared/helpers/apiError';
 import { normalizeNameFilter } from '../../shared/helpers/nameFilter';
 import { PAGE_SIZE, getTotalPages } from '../../shared/helpers/pagination';
@@ -26,7 +29,7 @@ function DoctorsPage() {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
-  const [formState, setFormState] = useState(null); // { doctor } | null
+  const [formState, setFormState] = useState(null);
   const [doctorToDelete, setDoctorToDelete] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(location.state?.feedback ?? null);
@@ -115,9 +118,9 @@ function DoctorsPage() {
       align: 'right',
       render: (doctor) => (
         <div className="flex items-center justify-end gap-2">
-          <Button
-            variant="ghost"
-            className="px-2 py-1 text-xs"
+          <IconButton
+            label={`Disponibilidad horaria de ${doctor.name}`}
+            path={ICON_PATHS.clock}
             onClick={() =>
               navigate(
                 generatePath(ROUTES.ADMIN_DOCTOR_AVAILABILITY, {
@@ -125,24 +128,19 @@ function DoctorsPage() {
                 })
               )
             }
-          >
-            Disponibilidad
-          </Button>
-          <Button
-            variant="ghost"
-            className="px-2 py-1 text-xs"
+          />
+          <IconButton
+            label={`Editar a ${doctor.name}`}
+            path={ICON_PATHS.edit}
             disabled={specialtiesLoading}
             onClick={() => openForm(doctor)}
-          >
-            Editar
-          </Button>
-          <Button
-            variant="ghost"
-            className="px-2 py-1 text-xs text-med-danger-text"
+          />
+          <IconButton
+            label={`Eliminar a ${doctor.name}`}
+            path={ICON_PATHS.trash}
+            danger
             onClick={() => setDoctorToDelete(doctor)}
-          >
-            Eliminar
-          </Button>
+          />
         </div>
       ),
     },
@@ -162,8 +160,18 @@ function DoctorsPage() {
               placeholder="Buscar doctor (mín. 3 letras)..."
               className="min-w-[220px] px-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-1 focus:ring-med-primary-600"
             />
-            <Button onClick={() => navigate(ROUTES.ADMIN_DOCTOR_CREATE)}>
-              + Nuevo doctor
+            <Button
+              className="inline-flex items-center gap-2 text-sm"
+              onClick={() => navigate(ROUTES.ADMIN_AVAILABILITY)}
+            >
+              <Icon path={ICON_PATHS.clock} />
+              Agregar Disponibilidad Horaria
+            </Button>
+            <Button
+              className="text-sm"
+              onClick={() => navigate(ROUTES.ADMIN_DOCTOR_CREATE)}
+            >
+              + Nuevo Doctor
             </Button>
           </>
         }
