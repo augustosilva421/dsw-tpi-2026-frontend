@@ -11,6 +11,7 @@ import useDoctorAvailabilityPage from '../hooks/useDoctorAvailabilityPage';
 function DoctorAvailabilityPage() {
   const {
     doctors,
+    doctorId,
     doctor,
     loading,
     error,
@@ -63,8 +64,16 @@ function DoctorAvailabilityPage() {
                 onCancel={handleCancel}
                 onSaved={handleSaved}
               />
-            ) : (
+            ) : doctorId ? (
               <Alert>No se encontró el profesional seleccionado.</Alert>
+            ) : (
+              <Card>
+                <p className="text-sm text-med-text-sub" role="status">
+                  {doctors.length > 0
+                    ? 'Seleccione un profesional para agregar su disponibilidad horaria.'
+                    : 'No hay médicos registrados. Agregue un doctor para configurar su disponibilidad horaria.'}
+                </p>
+              </Card>
             )}
           </div>
         </div>

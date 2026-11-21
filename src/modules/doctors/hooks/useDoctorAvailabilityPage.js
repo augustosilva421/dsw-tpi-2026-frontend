@@ -34,6 +34,7 @@ function useDoctorAvailabilityPage() {
 
   return {
     doctors,
+    doctorId,
     doctor,
     loading,
     error,

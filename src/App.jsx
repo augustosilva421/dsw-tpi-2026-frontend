@@ -75,6 +75,10 @@ const routes = [
       { path: ROUTES.ADMIN_DOCTORS, element: <DoctorsPage /> },
       { path: ROUTES.ADMIN_DOCTOR_CREATE, element: <CreateDoctorPage /> },
       {
+        path: ROUTES.ADMIN_AVAILABILITY,
+        element: <DoctorAvailabilityPage />,
+      },
+      {
         path: ROUTES.ADMIN_DOCTOR_AVAILABILITY,
         element: <DoctorAvailabilityPage />,
       },
