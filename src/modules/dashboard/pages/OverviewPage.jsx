@@ -1,37 +1,30 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useDoctors from '../../doctors/hooks/useDoctors';
+import Alert from '../../shared/components/Alert';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
 import PageHeader from '../../shared/components/PageHeader';
 import StatusBadge from '../../shared/components/StatusBadge';
 import Table from '../../shared/components/Table';
 import TablePagination from '../../shared/components/TablePagination';
-
-const previewDoctors = [
-  {
-    id: 'MED-4920',
-    name: 'Dr. Alejandro Rivera',
-    specialty: 'Cardiología Clínica',
-    status: 'Activo',
-    statusType: 'active',
-  },
-  {
-    id: 'MED-2104',
-    name: 'Dra. Elena Martínez',
-    specialty: 'Pediatría Avanzada',
-    status: 'De licencia',
-    statusType: 'leave',
-  },
-  {
-    id: 'MED-8831',
-    name: 'Dr. Marcos Torres',
-    specialty: 'Neurocirugía',
-    status: 'Activo',
-    statusType: 'active',
-  },
-];
+import { ROUTES } from '../../shared/constants/routes';
+import { PAGE_SIZE, getTotalPages } from '../../shared/helpers/pagination';
+import useSpecialties from '../../specialties/hooks/useSpecialties';
 
 function OverviewPage() {
   const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+
+  const {
+    data: doctors,
+    total: doctorsTotal,
+    loading: doctorsLoading,
+    error: doctorsError,
+  } = useDoctors({ page, pageSize: PAGE_SIZE });
+
+  const { total: specialtiesTotal, loading: specialtiesLoading } =
+    useSpecialties({ pageSize: 1 });
 
   const columns = [
     {
@@ -40,28 +33,23 @@ function OverviewPage() {
       render: (doctor) => (
         <div>
           <p className="font-semibold text-med-primary-900">{doctor.name}</p>
-          <p className="text-xs text-med-text-muted">ID: {doctor.id}</p>
+          {doctor.licenseNumber && (
+            <p className="text-xs text-med-text-muted">
+              Matrícula: {doctor.licenseNumber}
+            </p>
+          )}
         </div>
       ),
     },
     {
       key: 'specialty',
       header: 'Especialidad',
-      render: (doctor) => (
-        <StatusBadge tone="info">{doctor.specialty}</StatusBadge>
-      ),
-    },
-    {
-      key: 'status',
-      header: 'Estado de disponibilidad',
-      render: (doctor) => (
-        <StatusBadge
-          tone={doctor.statusType === 'active' ? 'success' : 'warning'}
-          dot
-        >
-          {doctor.status}
-        </StatusBadge>
-      ),
+      render: (doctor) =>
+        doctor.specialty?.name ? (
+          <StatusBadge tone="info">{doctor.specialty.name}</StatusBadge>
+        ) : (
+          '-'
+        ),
     },
     {
       key: 'actions',
@@ -71,7 +59,7 @@ function OverviewPage() {
         <Button
           variant="ghost"
           className="px-2 py-1 text-xs"
-          onClick={() => navigate('/admin/doctors')}
+          onClick={() => navigate(ROUTES.ADMIN_DOCTORS)}
         >
           Ver detalle
         </Button>
@@ -86,14 +74,14 @@ function OverviewPage() {
         description="Accesos rápidos a la gestión del portal médico."
         actions={
           <>
-            <Button onClick={() => navigate('/admin/doctors')}>
-              + Nuevo doctor
+            <Button onClick={() => navigate(ROUTES.ADMIN_DOCTORS)}>
+              Gestionar doctores
             </Button>
             <Button
               variant="secondary"
-              onClick={() => navigate('/admin/specialties')}
+              onClick={() => navigate(ROUTES.ADMIN_SPECIALTIES)}
             >
-              + Nueva especialidad
+              Gestionar especialidades
             </Button>
           </>
         }
@@ -105,29 +93,31 @@ function OverviewPage() {
             Doctores registrados
           </p>
           <p className="text-3xl font-extrabold text-med-primary-900 mt-2">
-            {previewDoctors.length}
+            {doctorsLoading ? '...' : doctorsTotal}
           </p>
         </Card>
         <Card>
           <p className="text-xs font-semibold uppercase tracking-wider text-med-text-sub">
-            Doctores activos
+            Especialidades registradas
           </p>
           <p className="text-3xl font-extrabold text-med-primary-900 mt-2">
-            {
-              previewDoctors.filter((doctor) => doctor.statusType === 'active')
-                .length
-            }
+            {specialtiesLoading ? '...' : specialtiesTotal}
           </p>
         </Card>
-        <Card>
+        <Card className="flex flex-col justify-between gap-3">
           <p className="text-xs font-semibold uppercase tracking-wider text-med-text-sub">
-            Acciones disponibles
+            Turnos
           </p>
-          <p className="text-sm font-semibold text-med-primary-900 mt-3">
-            Gestión de médicos y especialidades
-          </p>
+          <Button
+            variant="secondary"
+            onClick={() => navigate(ROUTES.ADMIN_APPOINTMENTS)}
+          >
+            Buscar turnos
+          </Button>
         </Card>
       </div>
+
+      {doctorsError && <Alert>{doctorsError}</Alert>}
 
       <Card className="p-0 overflow-hidden border-med-border">
         <div className="p-5 border-b border-med-border flex items-center justify-between gap-4">
@@ -137,21 +127,25 @@ function OverviewPage() {
           <Button
             variant="ghost"
             className="px-2 py-1 text-xs"
-            onClick={() => navigate('/admin/doctors')}
+            onClick={() => navigate(ROUTES.ADMIN_DOCTORS)}
           >
             Ver todos
           </Button>
         </div>
         <Table
           columns={columns}
-          data={previewDoctors}
+          data={doctors}
           rowKey={(doctor) => doctor.id}
+          loading={doctorsLoading}
+          emptyMessage="Todavía no hay doctores registrados"
         />
         <TablePagination
-          currentPage={1}
-          totalPages={1}
-          totalItems={previewDoctors.length}
-          pageSize={Math.max(previewDoctors.length, 1)}
+          currentPage={page}
+          totalPages={getTotalPages(doctorsTotal)}
+          totalItems={doctorsTotal}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPage}
+          disabled={doctorsLoading}
         />
       </Card>
     </div>
