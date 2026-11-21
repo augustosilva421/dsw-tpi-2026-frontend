@@ -52,7 +52,7 @@ function AppointmentsPage() {
             Consultá y gestioná tus citas médicas reservadas.
           </p>
         </div>
-        <Button onClick={() => navigate('/')}>+ Solicitar Nuevo Turno</Button>
+        <Button onClick={() => navigate(ROUTES.PATIENT_HOME)}>+ Solicitar Nuevo Turno</Button>
       </div>
 
       {successMessage && (

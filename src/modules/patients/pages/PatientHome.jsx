@@ -437,7 +437,7 @@ function PatientHome() {
               >
                 Reservar otro turno
               </Button>
-              <Button type="button" onClick={() => navigate('/appointments')}>
+              <Button type="button" onClick={() => navigate(ROUTES.PATIENT_APPOINTMENTS)}>
                 Ver Mis Turnos
               </Button>
             </div>

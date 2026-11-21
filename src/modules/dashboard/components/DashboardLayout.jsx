@@ -9,12 +9,12 @@ function DashboardLayout() {
 
   const handleLogout = () => {
     logout();
-    navigate('/admin/login');
+    navigate(ROUTES.ADMIN_LOGIN);
   };
 
   const navItems = [
     {
-      to: '/admin/home',
+      to: ROUTES.ADMIN_HOME,
       label: 'Tablero',
       icon: (
         <svg
@@ -33,7 +33,7 @@ function DashboardLayout() {
       ),
     },
     {
-      to: '/admin/doctors',
+      to: ROUTES.ADMIN_DOCTORS,
       label: 'Doctores',
       icon: (
         <svg
@@ -52,7 +52,7 @@ function DashboardLayout() {
       ),
     },
     {
-      to: '/admin/specialties',
+      to: ROUTES.ADMIN_SPECIALTIES,
       label: 'Especialidades',
       icon: (
         <svg
@@ -71,7 +71,7 @@ function DashboardLayout() {
       ),
     },
     {
-      to: '/admin/patients',
+      to: ROUTES.ADMIN_APPOINTMENTS,
       label: 'Búsqueda de Pacientes',
       icon: (
         <svg

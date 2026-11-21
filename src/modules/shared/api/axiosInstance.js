@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { ROLES } from '../../auth/constants/roles';
+import { ROLES } from '../constants/roles';
+import { ROUTES } from '../constants/routes';
 
 const LOGIN_PATHS = ['/auth/admin/login', '/auth/patient/login'];
 
@@ -39,11 +40,11 @@ instance.interceptors.response.use(
 
     if (status === 401 && !isLoginRequest(error.config?.url)) {
       clearSession();
-      window.location.href = isAdmin ? '/admin/login' : '/login';
+      window.location.href = isAdmin ? ROUTES.ADMIN_LOGIN : ROUTES.PATIENT_LOGIN;
     }
 
     if (status === 403) {
-      const home = isAdmin ? '/admin/home' : '/';
+      const home = isAdmin ? ROUTES.ADMIN_HOME : ROUTES.PATIENT_HOME;
 
       if (window.location.pathname !== home) {
         window.location.href = home;

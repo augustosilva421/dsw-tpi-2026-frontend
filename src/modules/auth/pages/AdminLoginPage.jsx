@@ -20,7 +20,7 @@ function AdminLoginPage() {
   const onValid = async (formData) => {
     try {
       await loginAdmin(formData.email, formData.password);
-      navigate('/admin/home');
+      navigate(ROUTES.ADMIN_HOME);
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     }
@@ -242,7 +242,7 @@ function AdminLoginPage() {
       {/* Switch to Patient Portal */}
       <div className="mt-6 text-center">
         <Link
-          to="/login"
+          to={ROUTES.PATIENT_LOGIN}
           className="text-xs text-med-primary-200 hover:text-white transition"
         >
           ← Volver al Portal de Pacientes

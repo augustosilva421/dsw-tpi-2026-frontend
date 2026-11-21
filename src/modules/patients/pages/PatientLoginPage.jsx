@@ -19,7 +19,7 @@ function PatientLoginPage() {
   const onValid = async (formData) => {
     try {
       await loginPatient(formData.email, formData.dni);
-      navigate('/');
+      navigate(ROUTES.PATIENT_HOME);
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     }
@@ -144,7 +144,7 @@ function PatientLoginPage() {
       {/* Switch to Admin Portal */}
       <div className="mt-6 text-center">
         <Link
-          to="/admin/login"
+          to={ROUTES.ADMIN_LOGIN}
           className="text-xs text-med-primary-200 hover:text-white transition"
         >
           ¿Es personal administrativo o médico? Ingrese aquí →
