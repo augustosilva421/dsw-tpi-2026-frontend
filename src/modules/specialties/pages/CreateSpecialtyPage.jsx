@@ -9,7 +9,7 @@ function CreateSpecialtyPage() {
   const { handleSave, handleCancel } = useCreateSpecialty();
 
   return (
-    <AdminFormPage className="gap-5 [&_label]:text-sm [&_label]:font-normal [&_textarea]:min-h-[150px] [&_select:disabled]:text-med-text-main [&_select:disabled]:opacity-100">
+    <AdminFormPage className="gap-5 [&_label]:text-sm [&_label]:font-normal [&_textarea]:min-h-[150px]">
       <Breadcrumb
         items={[
           { label: 'Especialidades', to: ROUTES.ADMIN_SPECIALTIES },
