@@ -7,12 +7,12 @@ const pick = (...values) =>
   values.find((value) => value !== undefined && value !== null);
 
 const mapAppointment = (raw) => {
-  const slot = raw.availableTime ?? raw.slot ?? {};
+  const slot = raw.slot ?? raw.availableTime ?? {};
   const dateTime = typeof slot === 'string' ? slot : slot.dateTime;
 
   return {
-    id: raw.id,
-    status: raw.status,
+    id: pick(raw.appointmentsId, raw.id),
+    status: pick(raw.appointmentsStatus, raw.status),
     patientName: pick(
       raw.patient?.fullName,
       raw.patient?.name,
