@@ -10,6 +10,7 @@ function Button({
   }
 
   const variantStyle = {
+    unstyled: 'transition',
     default:
       'bg-med-primary-900 hover:bg-med-primary-800 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition',
     secondary:
