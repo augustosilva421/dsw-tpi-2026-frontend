@@ -26,7 +26,9 @@ export const formatDayChip = (isoDate) => {
       .toLocaleDateString('es-AR', { weekday: 'short' })
       .replace('.', ''),
     day: date.getDate(),
-    month: date.toLocaleDateString('es-AR', { month: 'short' }).replace('.', ''),
+    month: date
+      .toLocaleDateString('es-AR', { month: 'short' })
+      .replace('.', ''),
   };
 };
 

@@ -16,6 +16,7 @@ function usePaginatedQuery(fetcher, params) {
     fetcher(JSON.parse(paramsKey))
       .then((result) => {
         if (ignore) return;
+
         setState({
           data: result.data ?? [],
           total: result.total ?? 0,
@@ -25,6 +26,7 @@ function usePaginatedQuery(fetcher, params) {
       })
       .catch((error) => {
         if (ignore) return;
+
         setState({
           data: [],
           total: 0,

@@ -28,12 +28,7 @@ const mapAppointment = (raw) => {
       ''
     ),
     date: pick(slot.date, slot.slotDate, dateTime?.split('T')[0], raw.date, ''),
-    startTime: pick(
-      slot.startTime,
-      dateTime?.split('T')[1],
-      raw.startTime,
-      ''
-    ),
+    startTime: pick(slot.startTime, dateTime?.split('T')[1], raw.startTime, ''),
   };
 };
 
@@ -48,8 +43,11 @@ export const searchAppointments = async ({
   const params = { pageIndex: toBackendPage(page), pageSize };
 
   if (specialtyId) params.specialtyId = specialtyId;
+
   if (doctorId) params.doctorId = doctorId;
+
   if (dni) params.dni = dni;
+
   if (date) params.date = date;
 
   const { data } = await instance.get(`${APPOINTMENTS_URL}/search`, {
@@ -65,20 +63,4 @@ export const markAppointmentAttended = async (id) => {
 
 export const markAppointmentNoShow = async (id) => {
   await instance.put(`${APPOINTMENTS_URL}/${id}/no-show`);
-};
-
-export const createAppointment = async ({
-  doctorId,
-  availabilitySlotId,
-  dni,
-  reason,
-}) => {
-  const { data } = await instance.post(APPOINTMENTS_URL, {
-    doctorId,
-    availabilitySlotId,
-    patient: { dni: Number(dni) },
-    reason,
-  });
-
-  return data;
 };

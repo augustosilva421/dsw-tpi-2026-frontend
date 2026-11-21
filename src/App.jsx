@@ -5,7 +5,8 @@ import {
 } from 'react-router-dom';
 import { AuthProvider } from './modules/auth/context/AuthProvider';
 import ProtectedRoute from './modules/auth/components/ProtectedRoute';
-import { ROLES } from './modules/auth/constants/roles';
+import { ROLES } from './modules/shared/constants/roles';
+import { ROUTES } from './modules/shared/constants/routes';
 
 // Auth Module
 import AdminLoginPage from './modules/auth/pages/AdminLoginPage';
@@ -27,80 +28,51 @@ import AppointmentsSearchPage from './modules/appointments/pages/AppointmentsSea
 
 const routes = [
   // Rutas públicas
-  {
-    path: '/login',
-    element: <PatientLoginPage />,
-  },
-  {
-    path: '/admin/login',
-    element: <AdminLoginPage />,
-  },
+  { path: ROUTES.PATIENT_LOGIN, element: <PatientLoginPage /> },
+  { path: ROUTES.ADMIN_LOGIN, element: <AdminLoginPage /> },
 
-  // Rutas privadas de pacientes (URL base y turnos)
+  // Rutas privadas de pacientes
   {
-    path: '/',
+    path: ROUTES.PATIENT_HOME,
     element: (
-      <ProtectedRoute redirectTo="/login" allowedRoles={[ROLES.PATIENT]}>
+      <ProtectedRoute
+        redirectTo={ROUTES.PATIENT_LOGIN}
+        allowedRoles={[ROLES.PATIENT]}
+      >
         <PatientLayout />
       </ProtectedRoute>
     ),
     children: [
-      {
-        index: true,
-        element: <PatientHome />,
-      },
-      {
-        path: 'appointments',
-        element: <AppointmentsPage />,
-      },
+      { index: true, element: <PatientHome /> },
+      { path: ROUTES.PATIENT_APPOINTMENTS, element: <AppointmentsPage /> },
     ],
   },
 
-  // Rutas privadas de gestión clínica y administración
+  // Rutas privadas de administración
   {
-    path: '/admin',
+    path: ROUTES.ADMIN_ROOT,
     element: (
-      <ProtectedRoute redirectTo="/admin/login" allowedRoles={[ROLES.ADMIN]}>
+      <ProtectedRoute
+        redirectTo={ROUTES.ADMIN_LOGIN}
+        allowedRoles={[ROLES.ADMIN]}
+      >
         <DashboardLayout />
       </ProtectedRoute>
     ),
     children: [
+      { index: true, element: <Navigate to={ROUTES.ADMIN_HOME} replace /> },
+      { path: ROUTES.ADMIN_HOME, element: <OverviewPage /> },
+      { path: ROUTES.ADMIN_APPOINTMENTS, element: <AppointmentsSearchPage /> },
       {
-        index: true,
-        element: <Navigate to="/admin/home" replace />,
+        path: `${ROUTES.ADMIN_ROOT}/appointments`,
+        element: <Navigate to={ROUTES.ADMIN_APPOINTMENTS} replace />,
       },
-      {
-        path: 'home',
-        element: <OverviewPage />,
-      },
-      {
-        path: 'patients',
-        element: <AppointmentsSearchPage />,
-      },
-      {
-        path: 'patient-search',
-        element: <AppointmentsSearchPage />,
-      },
-      {
-        path: 'appointments',
-        element: <Navigate to="/admin/patients" replace />,
-      },
-      {
-        path: 'specialties',
-        element: <SpecialtiesPage />,
-      },
-      {
-        path: 'doctors',
-        element: <DoctorsPage />,
-      },
+      { path: ROUTES.ADMIN_SPECIALTIES, element: <SpecialtiesPage /> },
+      { path: ROUTES.ADMIN_DOCTORS, element: <DoctorsPage /> },
     ],
   },
 
-  // Redirección para cualquier otra URL
-  {
-    path: '*',
-    element: <Navigate to="/" replace />,
-  },
+  { path: '*', element: <Navigate to={ROUTES.PATIENT_HOME} replace /> },
 ];
 
 function App() {

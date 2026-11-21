@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
-import useAuth from '../hook/useAuth';
-import { getApiErrorMessage } from '../helpers/backendError';
+import { getErrorMessage } from '../../shared/helpers/apiError';
+import { ROUTES } from '../../shared/constants/routes';
+import useAuth from '../hooks/useAuth';
 
 function AdminLoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
@@ -20,9 +21,9 @@ function AdminLoginPage() {
   const onValid = async (formData) => {
     try {
       await loginAdmin(formData.email, formData.password);
-      navigate('/admin/home');
+      navigate(ROUTES.ADMIN_HOME);
     } catch (error) {
-      setErrorMessage(getApiErrorMessage(error));
+      setErrorMessage(getErrorMessage(error));
     }
   };
 
@@ -242,7 +243,7 @@ function AdminLoginPage() {
       {/* Switch to Patient Portal */}
       <div className="mt-6 text-center">
         <Link
-          to="/login"
+          to={ROUTES.PATIENT_LOGIN}
           className="text-xs text-med-primary-200 hover:text-white transition"
         >
           ← Volver al Portal de Pacientes

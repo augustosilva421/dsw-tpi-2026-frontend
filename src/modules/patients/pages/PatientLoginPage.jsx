@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../shared/components/Button';
-import useAuth from '../../auth/hook/useAuth';
-import { getApiErrorMessage } from '../../auth/helpers/backendError';
+import useAuth from '../../auth/hooks/useAuth';
+import { getErrorMessage } from '../../shared/helpers/apiError';
+import { ROUTES } from '../../shared/constants/routes';
 
 function PatientLoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
@@ -19,9 +20,9 @@ function PatientLoginPage() {
   const onValid = async (formData) => {
     try {
       await loginPatient(formData.email, formData.dni);
-      navigate('/');
+      navigate(ROUTES.PATIENT_HOME);
     } catch (error) {
-      setErrorMessage(getApiErrorMessage(error));
+      setErrorMessage(getErrorMessage(error));
     }
   };
 
@@ -84,7 +85,7 @@ function PatientLoginPage() {
               </span>
               <input
                 type="email"
-                placeholder="paciente@medportal.com"
+                placeholder="correo@ejemplo.com"
                 className={`w-full border rounded-lg pl-10 pr-3.5 py-2.5 text-sm bg-white text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent ${
                   errors.email
                     ? 'border-red-400 bg-red-50/20'
@@ -144,7 +145,7 @@ function PatientLoginPage() {
       {/* Switch to Admin Portal */}
       <div className="mt-6 text-center">
         <Link
-          to="/admin/login"
+          to={ROUTES.ADMIN_LOGIN}
           className="text-xs text-med-primary-200 hover:text-white transition"
         >
           ¿Es personal administrativo o médico? Ingrese aquí →

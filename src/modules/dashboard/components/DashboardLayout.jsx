@@ -1,20 +1,22 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import useAuth from '../../auth/hook/useAuth';
+import useAuth from '../../auth/hooks/useAuth';
+import { getInitials } from '../../shared/helpers/userDisplay';
+import { ROUTES } from '../../shared/constants/routes';
 
 function DashboardLayout() {
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { email, logout } = useAuth();
 
   const handleLogout = () => {
     logout();
-    navigate('/admin/login');
+    navigate(ROUTES.ADMIN_LOGIN);
   };
 
   const navItems = [
     {
-      to: '/admin/home',
+      to: ROUTES.ADMIN_HOME,
       label: 'Tablero',
       icon: (
         <svg
@@ -33,7 +35,7 @@ function DashboardLayout() {
       ),
     },
     {
-      to: '/admin/doctors',
+      to: ROUTES.ADMIN_DOCTORS,
       label: 'Doctores',
       icon: (
         <svg
@@ -52,7 +54,7 @@ function DashboardLayout() {
       ),
     },
     {
-      to: '/admin/specialties',
+      to: ROUTES.ADMIN_SPECIALTIES,
       label: 'Especialidades',
       icon: (
         <svg
@@ -71,7 +73,7 @@ function DashboardLayout() {
       ),
     },
     {
-      to: '/admin/patients',
+      to: ROUTES.ADMIN_APPOINTMENTS,
       label: 'Búsqueda de Pacientes',
       icon: (
         <svg
@@ -163,14 +165,14 @@ function DashboardLayout() {
           {/* User Profile Info */}
           <div className="pt-3 border-t border-med-border flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-med-primary-100 text-med-primary-900 flex items-center justify-center font-bold text-xs">
-              AD
+              {getInitials(email ?? '')}
             </div>
             <div className="overflow-hidden">
               <p className="text-xs font-semibold text-med-text-main truncate">
-                Admin User
+                {email}
               </p>
               <p className="text-[11px] text-med-text-muted truncate">
-                Super Administrator
+                Administrador
               </p>
             </div>
           </div>

@@ -5,8 +5,12 @@ const MESSAGES_BY_STATUS = {
   409: 'La operación entra en conflicto con el estado actual de los datos.',
 };
 
-const getDetails = (data) => {
+const FIXED_MESSAGES_BY_STATUS = {
+  401: 'Los datos ingresados son incorrectos.',
+  429: 'Demasiados intentos. Esperá un minuto y volvé a intentar.',
+};
 
+const getDetails = (data) => {
   if (Array.isArray(data?.details)) {
     return data.details.map(({ field, issue }) =>
       field ? `${field}: ${issue}` : issue
@@ -26,6 +30,11 @@ export const getErrorMessage = (error) => {
   }
 
   const { status, data } = error.response;
+
+  if (FIXED_MESSAGES_BY_STATUS[status]) {
+    return FIXED_MESSAGES_BY_STATUS[status];
+  }
+
   const base =
     data?.message ||
     data?.title ||
