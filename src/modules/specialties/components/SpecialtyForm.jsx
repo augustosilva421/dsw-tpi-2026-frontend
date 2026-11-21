@@ -1,32 +1,27 @@
-import { useForm } from 'react-hook-form';
+import FormActions from '../../shared/components/FormActions';
+import useSpecialtyForm from '../hooks/useSpecialtyForm';
 import Alert from '../../shared/components/Alert';
-import Button from '../../shared/components/Button';
 import Input from '../../shared/components/Input';
 import Textarea from '../../shared/components/Textarea';
+import Select from '../../shared/components/Select';
 
 function SpecialtyForm({
   specialty,
-  submitting,
-  serverError,
   onSubmit,
   onCancel,
+  showInitialStatus = false,
 }) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      name: specialty?.name ?? '',
-      description: specialty?.description ?? '',
-    },
+  const { register, errors, submitting, handleSubmit } = useSpecialtyForm({
+    specialty,
+    onSubmit,
   });
+  const serverError = errors.root?.server?.message;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <Input
         label="Nombre de la especialidad"
-        placeholder="Ej. Cardiología"
+        placeholder="Ej. Cardiología Intervencionista"
         error={errors.name?.message}
         {...register('name', {
           required: 'El nombre es obligatorio.',
@@ -36,7 +31,8 @@ function SpecialtyForm({
       />
       <Textarea
         label="Descripción"
-        placeholder="Detalle el alcance de la especialidad..."
+        placeholder="Detalle el alcance de la especialidad, procedimientos principales y requisitos de derivación..."
+        rows={6}
         error={errors.description?.message}
         {...register('description', {
           required: 'La descripción es obligatoria.',
@@ -45,16 +41,20 @@ function SpecialtyForm({
         })}
       />
 
+      {showInitialStatus && (
+        <Select label="Estado inicial" value="active" disabled>
+          <option value="active">Activo - Disponible para programación</option>
+        </Select>
+      )}
+
       {serverError && <Alert>{serverError}</Alert>}
 
-      <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={onCancel} disabled={submitting}>
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={submitting}>
-          {submitting ? 'Guardando...' : 'Guardar especialidad'}
-        </Button>
-      </div>
+      <FormActions
+        tone={showInitialStatus ? 'strong' : 'default'}
+        onCancel={onCancel}
+        submitting={submitting}
+        submitLabel="Guardar Especialidad"
+      />
     </form>
   );
 }

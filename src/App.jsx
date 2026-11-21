@@ -23,7 +23,10 @@ import OverviewPage from './modules/dashboard/pages/OverviewPage';
 
 // Domain Modules (Screaming Architecture)
 import DoctorsPage from './modules/doctors/pages/DoctorsPage';
+import CreateDoctorPage from './modules/doctors/pages/CreateDoctorPage';
+import DoctorAvailabilityPage from './modules/doctors/pages/DoctorAvailabilityPage';
 import SpecialtiesPage from './modules/specialties/pages/SpecialtiesPage';
+import CreateSpecialtyPage from './modules/specialties/pages/CreateSpecialtyPage';
 import AppointmentsSearchPage from './modules/appointments/pages/AppointmentsSearchPage';
 
 const routes = [
@@ -68,7 +71,13 @@ const routes = [
         element: <Navigate to={ROUTES.ADMIN_APPOINTMENTS} replace />,
       },
       { path: ROUTES.ADMIN_SPECIALTIES, element: <SpecialtiesPage /> },
+      { path: ROUTES.ADMIN_SPECIALTY_CREATE, element: <CreateSpecialtyPage /> },
       { path: ROUTES.ADMIN_DOCTORS, element: <DoctorsPage /> },
+      { path: ROUTES.ADMIN_DOCTOR_CREATE, element: <CreateDoctorPage /> },
+      {
+        path: ROUTES.ADMIN_DOCTOR_AVAILABILITY,
+        element: <DoctorAvailabilityPage />,
+      },
     ],
   },
 
