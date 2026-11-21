@@ -1,153 +1,45 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useDoctors from '../../doctors/hooks/useDoctors';
-import Alert from '../../shared/components/Alert';
 import Button from '../../shared/components/Button';
-import Card from '../../shared/components/Card';
-import PageHeader from '../../shared/components/PageHeader';
-import StatusBadge from '../../shared/components/StatusBadge';
-import Table from '../../shared/components/Table';
-import TablePagination from '../../shared/components/TablePagination';
+import Icon from '../../shared/components/Icon';
+import { ICON_PATHS } from '../../shared/constants/iconPaths';
 import { ROUTES } from '../../shared/constants/routes';
-import { PAGE_SIZE, getTotalPages } from '../../shared/helpers/pagination';
-import useSpecialties from '../../specialties/hooks/useSpecialties';
+import OverviewDoctorDirectory from '../components/OverviewDoctorDirectory';
+import OverviewSummary from '../components/OverviewSummary';
 
 function OverviewPage() {
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
-
-  const {
-    data: doctors,
-    total: doctorsTotal,
-    loading: doctorsLoading,
-    error: doctorsError,
-  } = useDoctors({ page, pageSize: PAGE_SIZE });
-
-  const { total: specialtiesTotal, loading: specialtiesLoading } =
-    useSpecialties({ pageSize: 1 });
-
-  const columns = [
-    {
-      key: 'name',
-      header: 'Nombre del doctor',
-      render: (doctor) => (
-        <div>
-          <p className="font-semibold text-med-primary-900">{doctor.name}</p>
-          {doctor.licenseNumber && (
-            <p className="text-xs text-med-text-muted">
-              Matrícula: {doctor.licenseNumber}
-            </p>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: 'specialty',
-      header: 'Especialidad',
-      render: (doctor) =>
-        doctor.specialty?.name ? (
-          <StatusBadge tone="info">{doctor.specialty.name}</StatusBadge>
-        ) : (
-          '-'
-        ),
-    },
-    {
-      key: 'actions',
-      header: 'Acciones',
-      align: 'right',
-      render: () => (
-        <Button
-          variant="ghost"
-          className="px-2 py-1 text-xs"
-          onClick={() => navigate(ROUTES.ADMIN_DOCTORS)}
-        >
-          Ver detalle
-        </Button>
-      ),
-    },
-  ];
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Resumen general"
-        description="Accesos rápidos a la gestión del portal médico."
-        actions={
-          <>
-            <Button onClick={() => navigate(ROUTES.ADMIN_DOCTORS)}>
-              Gestionar doctores
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => navigate(ROUTES.ADMIN_SPECIALTIES)}
-            >
-              Gestionar especialidades
-            </Button>
-          </>
-        }
-      />
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <p className="text-xs font-semibold uppercase tracking-wider text-med-text-sub">
-            Doctores registrados
+    <div className="flex flex-col gap-7">
+      <header className="flex flex-col justify-between gap-5 xl:flex-row xl:items-center">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-med-text-main">
+            Vista General de Gestión
+          </h1>
+          <p className="mt-1 text-sm text-med-text-sub">
+            Configure el personal médico y las especialidades del departamento.
           </p>
-          <p className="text-3xl font-extrabold text-med-primary-900 mt-2">
-            {doctorsLoading ? '...' : doctorsTotal}
-          </p>
-        </Card>
-        <Card>
-          <p className="text-xs font-semibold uppercase tracking-wider text-med-text-sub">
-            Especialidades registradas
-          </p>
-          <p className="text-3xl font-extrabold text-med-primary-900 mt-2">
-            {specialtiesLoading ? '...' : specialtiesTotal}
-          </p>
-        </Card>
-        <Card className="flex flex-col justify-between gap-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-med-text-sub">
-            Turnos
-          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            className="inline-flex items-center gap-2 text-sm"
+            onClick={() => navigate(ROUTES.ADMIN_DOCTOR_CREATE)}
+          >
+            <Icon path={ICON_PATHS.plus} className="h-3.5 w-3.5" />
+            Agregar Nuevo Doctor
+          </Button>
           <Button
             variant="secondary"
-            onClick={() => navigate(ROUTES.ADMIN_APPOINTMENTS)}
+            className="inline-flex items-center gap-2 text-sm"
+            onClick={() => navigate(ROUTES.ADMIN_SPECIALTY_CREATE)}
           >
-            Buscar turnos
-          </Button>
-        </Card>
-      </div>
-
-      {doctorsError && <Alert>{doctorsError}</Alert>}
-
-      <Card className="p-0 overflow-hidden border-med-border">
-        <div className="p-5 border-b border-med-border flex items-center justify-between gap-4">
-          <h2 className="text-base font-bold text-med-primary-900">
-            Directorio de profesionales médicos
-          </h2>
-          <Button
-            variant="ghost"
-            className="px-2 py-1 text-xs"
-            onClick={() => navigate(ROUTES.ADMIN_DOCTORS)}
-          >
-            Ver todos
+            <Icon path={ICON_PATHS.plus} className="h-3.5 w-3.5" />
+            Agregar Nueva Especialidad
           </Button>
         </div>
-        <Table
-          columns={columns}
-          data={doctors}
-          rowKey={(doctor) => doctor.id}
-          loading={doctorsLoading}
-          emptyMessage="Todavía no hay doctores registrados"
-        />
-        <TablePagination
-          currentPage={page}
-          totalPages={getTotalPages(doctorsTotal)}
-          totalItems={doctorsTotal}
-          pageSize={PAGE_SIZE}
-          onPageChange={setPage}
-          disabled={doctorsLoading}
-        />
-      </Card>
+      </header>
+      <OverviewSummary />
+      <OverviewDoctorDirectory />
     </div>
   );
 }
